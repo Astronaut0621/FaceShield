@@ -4,13 +4,8 @@ import { authStore } from '../stores/auth.store'
 
 export const http = axios.create({
   baseURL: appConfig.apiBaseUrl,
-  timeout: 30000
+  timeout: 60000
 })
-
-http.interceptors.response.use(
-  response => response,
-  error => Promise.reject(error)
-)
 
 http.interceptors.request.use(config => {
   if (authStore.token) {
@@ -18,3 +13,14 @@ http.interceptors.request.use(config => {
   }
   return config
 })
+
+http.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response?.status === 401 && !error.config?.url?.includes('/auth/login')) {
+      authStore.clearSession()
+      window.location.href = '/login'
+    }
+    return Promise.reject(error)
+  }
+)

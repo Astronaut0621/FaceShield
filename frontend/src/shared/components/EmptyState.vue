@@ -1,13 +1,42 @@
 <template>
-  <p class="empty">{{ message }}</p>
+  <div class="empty-state">
+    <p>{{ message }}</p>
+    <div v-if="$slots.action" class="empty-action">
+      <slot name="action" />
+    </div>
+  </div>
 </template>
 
 <script setup>
 defineProps({
   message: {
     type: String,
-    default: 'No data.'
+    default: '暂无数据'
   }
 })
 </script>
 
+<style scoped>
+.empty-state {
+  display: grid;
+  gap: 12px;
+  place-items: center;
+  padding: 40px 20px;
+  color: #64748b;
+  text-align: center;
+}
+
+.empty-state p {
+  margin: 0;
+}
+
+.empty-action :deep(button) {
+  height: 36px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 6px;
+  background: #166534;
+  color: #fff;
+  cursor: pointer;
+}
+</style>

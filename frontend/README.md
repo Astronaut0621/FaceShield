@@ -1,39 +1,59 @@
 # FaceShield Frontend
 
-Minimal Vue 3 + Vite frontend scaffold for FaceShield.
+Vue 3 + Vite 前端，按功能模块组织，页面与业务逻辑分离。
 
-## Run
+## 启动
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Structure
+## 目录结构
 
 ```text
-src/api/          Backward-compatible API exports
-src/config/       App-level runtime config
-src/constants/    Route and shared constants
-src/layouts/      Application shell layouts
-src/services/     HTTP client and cross-feature services
-src/stores/       Lightweight reactive stores
-src/composables/  Reusable Vue composition utilities
-src/shared/       Shared UI components
-src/features/     Feature modules grouped by domain
-src/views/        Route-level page components
-src/utils/        Formatting and response helpers
+public/                    静态资源（首页背景图等）
+src/
+├── main.js                应用入口
+├── App.vue                根组件（布局切换）
+├── config/                运行时配置
+├── constants/             路由名、导航项等常量
+├── router/                路由定义
+├── layouts/               应用壳布局（侧边栏）
+├── views/                 页面级组件（按业务域分子目录）
+│   ├── home/              首页
+│   ├── auth/              登录
+│   ├── detective/         图片检测工作台
+│   ├── result/            检测结果
+│   └── history/           历史记录与详情
+├── features/              功能模块（组件 + 服务）
+│   ├── auth/              认证
+│   ├── home/              首页模块
+│   ├── detection/         检测模块
+│   │   ├── components/
+│   │   │   ├── upload/    上传相关组件
+│   │   │   ├── result/    结果展示组件
+│   │   │   └── DetectionGuidePanel.vue
+│   │   └── services/
+│   └── history/           历史记录模块
+├── shared/                跨模块共享 UI 组件
+├── stores/                轻量 reactive 状态
+├── services/              HTTP 客户端
+├── composables/           可复用组合式函数
+├── utils/                 格式化、API 响应等工具
+└── styles/                全局样式
 ```
 
-Feature modules should own their own components and service wrappers. Route pages should compose feature modules instead of embedding business details directly.
+## 约定
 
-## Demo Login
+- **views/**：路由页面，负责组合 features 与 shared 组件，不写复杂业务逻辑
+- **features/**：按业务域划分，各模块拥有自己的 `components/` 与 `services/`
+- **shared/**：与具体业务无关的通用组件
+- 路径别名：`@/` 指向 `src/`（已在 `vite.config.js` 配置）
 
-The default backend seeds a demo account:
+## 演示账号
 
 ```text
 username: demo
 password: demo123456
 ```
-
-The frontend stores the bearer token in `localStorage` for the MVP demo and attaches it to protected API calls.

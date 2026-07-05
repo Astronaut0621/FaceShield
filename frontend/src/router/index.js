@@ -1,27 +1,32 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { routeNames } from '../constants/routes'
-import { authStore } from '../stores/auth.store'
-import LoginView from '../views/LoginView.vue'
-import UploadView from '../views/UploadView.vue'
-import HistoryView from '../views/HistoryView.vue'
-import ResultView from '../views/ResultView.vue'
+import { routeNames } from '@/constants/routes'
+import { authStore } from '@/stores/auth.store'
+import LoginView from '@/views/auth/LoginView.vue'
+import HomeView from '@/views/home/HomeView.vue'
+import DetectiveView from '@/views/detective/DetectiveView.vue'
+import HistoryView from '@/views/history/HistoryView.vue'
+import HistoryDetailView from '@/views/history/HistoryDetailView.vue'
+import ResultView from '@/views/result/ResultView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    { path: '/login', name: routeNames.login, component: LoginView, meta: { public: true } },
-    { path: '/', name: routeNames.detection, component: UploadView },
-    { path: '/result', name: routeNames.result, component: ResultView },
-    { path: '/history', name: routeNames.history, component: HistoryView }
+    { path: '/', name: routeNames.home, component: HomeView, meta: { public: true, standalone: true } },
+    { path: '/login', name: routeNames.login, component: LoginView, meta: { public: true, standalone: true } },
+    { path: '/detective', name: routeNames.detective, component: DetectiveView },
+    { path: '/detection', redirect: '/detective' },
+    { path: '/result/:id', name: routeNames.result, component: ResultView },
+    { path: '/history', name: routeNames.history, component: HistoryView },
+    { path: '/history/:id', name: routeNames.historyDetail, component: HistoryDetailView }
   ]
 })
 
 router.beforeEach(to => {
   if (!to.meta.public && !authStore.isAuthenticated) {
-    return { name: routeNames.login }
+    return { name: routeNames.login, query: { redirect: to.fullPath } }
   }
   if (to.name === routeNames.login && authStore.isAuthenticated) {
-    return { name: routeNames.detection }
+    return { name: routeNames.detective }
   }
   return true
 })

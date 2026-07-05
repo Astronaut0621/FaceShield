@@ -1,13 +1,5 @@
 # Styles
 
-The current prototype keeps global CSS in `src/style.css`.
+- `global.css` — 全局样式（重置、布局壳、登录页、通用页面样式）
 
-Use this folder for future split files, for example:
-
-```text
-tokens.css       Color, spacing, typography tokens
-base.css         Reset and base elements
-components.css   Shared component styles
-utilities.css    Small utility classes
-```
-
+组件私有样式写在各 `.vue` 文件的 `<style scoped>` 中。

@@ -1,5 +1,5 @@
 <template>
-  <RouterView v-if="route.meta.public" />
+  <RouterView v-if="route.meta.standalone" />
   <AppLayout v-else>
     <RouterView />
   </AppLayout>
