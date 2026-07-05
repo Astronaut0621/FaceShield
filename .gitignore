@@ -3,6 +3,9 @@ __pycache__/
 .venv/
 venv/
 .env
+.DS_Store
+Thumbs.db
+.vscode/
 *.db
 backend/storage/uploads/*
 backend/storage/reports/*
@@ -12,4 +15,31 @@ backend/storage/heatmaps/*
 !backend/storage/heatmaps/.gitkeep
 frontend/node_modules/
 frontend/dist/
+
+# Local datasets and generated ML artifacts
+data/
+AutoDL/
+FaceForensics-master/
+faceshield_outputs/
+outputs/
+
+# Archives and model checkpoints
+*.zip
+*.tar.gz
+*.tgz
+*.7z
+*.rar
+*.pdparams
+*.pdmodel
+*.pdiparams
+*.pdopt
+*.pth
+*.pt
+*.ckpt
+*.onnx
+
+# Local report/template binaries and Office lock files
+docs/*.doc
+docs/*.docx
+~$*
 
