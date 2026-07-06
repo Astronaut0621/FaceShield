@@ -9,11 +9,11 @@
 
     <div class="filters">
       <label>
-        结论
+        模型结果
         <select v-model="filters.label" @change="onFilterChange">
           <option value="">全部</option>
-          <option value="real">真实人脸</option>
-          <option value="fake">伪造人脸</option>
+          <option value="real">模型判为真实</option>
+          <option value="fake">模型判为伪造</option>
         </select>
       </label>
       <label>

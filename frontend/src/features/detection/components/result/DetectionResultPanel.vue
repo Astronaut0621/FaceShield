@@ -3,7 +3,10 @@
     <header class="result-header">
       <div>
         <p class="result-kicker">检测结果</p>
-        <h3 :class="['verdict', result.label]">{{ formatLabel(result.label) }}</h3>
+        <h3 :class="['verdict', riskLevelClass(result.riskLevel)]">
+          {{ formatRiskLevel(result.riskLevel) }}
+        </h3>
+        <p class="verdict-note">模型二分类结果：{{ formatLabel(result.label) }}</p>
       </div>
       <ProbabilityGauge :value="result.fakeProbability" :risk-level="result.riskLevel" />
     </header>
@@ -71,7 +74,7 @@ import HeatmapViewer from './HeatmapViewer.vue'
 import ProbabilityGauge from './ProbabilityGauge.vue'
 import RiskBadge from './RiskBadge.vue'
 import ScoreBar from './ScoreBar.vue'
-import { formatDateTime, formatLabel } from '@/utils/formatters'
+import { formatDateTime, formatLabel, formatRiskLevel, riskLevelClass } from '@/utils/formatters'
 import { resolveStorageUrl } from '@/utils/storage'
 
 defineProps({
@@ -113,12 +116,23 @@ defineProps({
   font-size: 28px;
 }
 
-.verdict.real {
+.verdict.risk-low {
   color: var(--accent);
 }
 
-.verdict.fake {
+.verdict.risk-medium {
+  color: #d97706;
+}
+
+.verdict.risk-high {
   color: #b42318;
+}
+
+.verdict-note {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 650;
 }
 
 .result-meta {

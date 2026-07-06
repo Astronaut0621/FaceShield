@@ -26,9 +26,9 @@ def parse_args() -> argparse.Namespace:
 
 
 def risk_level(fake_probability: float) -> str:
-    if fake_probability < 0.4:
+    if fake_probability < 0.35:
         return "low"
-    if fake_probability < 0.7:
+    if fake_probability < 0.8:
         return "medium"
     return "high"
 

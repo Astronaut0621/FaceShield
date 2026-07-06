@@ -167,9 +167,13 @@ password: demo123456
 
 风险等级规则：
 
-- `< 0.4`：`low`
-- `0.4 - 0.7`：`medium`
-- `>= 0.7`：`high`
+- `< 0.35`：`low`
+- `0.35 - 0.80`：`medium`
+- `>= 0.80`：`high`
+
+说明：`label` 保留模型二分类结果，仍按 `fake_probability >= 0.50`
+映射为 `fake`，否则为 `real`；`risk_level` 是业务展示字段，由
+`fake_probability` 派生，不作为新的训练标签。
 
 ## 后端分层
 

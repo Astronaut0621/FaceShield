@@ -130,7 +130,7 @@ python -c "from app.algorithm.status import get_algorithm_status; print(get_algo
 -> resize 到 224x224
 -> 构造 RGB 输入和高频 FFT 输入
 -> Paddle fusion_v2 推理
--> 输出 real/fake、伪造概率、confidence
+-> 输出模型二分类结果、伪造概率、confidence
 -> 计算风险等级
 -> 生成可疑区域热力图
 -> 保存检测记录
@@ -151,10 +151,10 @@ python -c "from app.algorithm.status import get_algorithm_status; print(get_algo
 |---|---|
 | `task_id` | 检测任务编号 |
 | `file_id` | 上传文件编号 |
-| `label` | `real` 或 `fake` |
+| `label` | 模型二分类结果，`real` 或 `fake` |
 | `fake_probability` | 伪造概率，范围 0 到 1 |
 | `confidence` | 当前预测类别概率 |
-| `risk_level` | `low`、`medium`、`high` |
+| `risk_level` | 业务风险等级，`low`、`medium`、`high` |
 | `frequency_score` | 频域分数 |
 | `spatial_score` | 空域分数 |
 | `original_image_url` | 原始上传图访问路径 |
@@ -166,6 +166,9 @@ python -c "from app.algorithm.status import get_algorithm_status; print(get_algo
 | `created_at` | 检测时间 |
 
 静态资源通过后端 `/storage/...` 暴露，前端使用 `VITE_STORAGE_BASE_URL` 拼接完整 URL。
+
+约定：`label` 保持 real/fake 二分类语义，默认由 `fake_probability >= 0.50`
+得到；`risk_level` 由业务层根据 `fake_probability` 派生，用于前端主展示和历史筛选，不作为新的模型标签。
 
 ## 7. 模型版本管理
 

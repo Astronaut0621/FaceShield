@@ -225,6 +225,34 @@ model/gradcam/<run>/
 model attention for the selected class; it is not a pixel-level manipulation
 mask.
 
+## Threshold Evaluation
+
+Use `evaluate_thresholds.py` to test different fake-probability decision
+thresholds from saved per-image predictions. This does not rerun inference.
+
+```powershell
+.\.venv\Scripts\python.exe training\evaluate_thresholds.py `
+  --predictions model\robustness\jpeg\predictions_by_quality.csv `
+  --model fusion_v2 `
+  --quality original `
+  --output-dir model\thresholds\fusion_v2_original
+```
+
+The script writes:
+
+```text
+model/thresholds/fusion_v2_original/
+├─ metrics_by_threshold.csv
+├─ metrics_by_threshold.json
+└─ summary.md
+```
+
+For the current `fusion_v2` test predictions, threshold `0.35` gives the best
+F1 in the scanned range and improves fake recall compared with the default
+`0.50` threshold, but it also increases false positives. FaceShield keeps
+`0.50` as the binary `label` threshold and uses the threshold scan to define
+display-only risk levels: `<0.35` low, `0.35-0.80` medium, `>=0.80` high.
+
 ## Upload Scope
 
 Only these are required on AutoDL:

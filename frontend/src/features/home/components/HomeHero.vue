@@ -14,8 +14,8 @@
 
     <div class="hero-visual" aria-label="检测流程预览">
       <div class="scan-card main-card">
-        <span class="scan-label">检测结论</span>
-        <strong>疑似伪造</strong>
+        <span class="scan-label">风险等级</span>
+        <strong>高风险</strong>
         <p>模型关注区域集中在人脸边界与眼周纹理。</p>
       </div>
       <div class="face-frame">

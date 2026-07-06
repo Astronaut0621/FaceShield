@@ -2,8 +2,8 @@ from app.domain.enums import RiskLevel
 
 
 class RiskPolicy:
-    LOW_THRESHOLD = 0.4
-    HIGH_THRESHOLD = 0.7
+    LOW_THRESHOLD = 0.35
+    HIGH_THRESHOLD = 0.8
 
     SUGGESTIONS = {
         RiskLevel.LOW: "No obvious forgery risk was found. Use the result as a reference only.",

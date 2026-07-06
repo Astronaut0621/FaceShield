@@ -5,8 +5,8 @@ const RISK_LABELS = {
 }
 
 const LABEL_TEXT = {
-  real: '真实人脸',
-  fake: '伪造人脸'
+  real: '模型判为真实',
+  fake: '模型判为伪造'
 }
 
 export function formatPercent(value, digits = 0) {

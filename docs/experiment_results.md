@@ -157,6 +157,20 @@ RGB spatial branch
 
 结果显示，JPEG 压缩会造成模型性能下降，q30 强压缩下下降更明显。fusion_v2 和 fusion_v3 在所有压缩质量下均保持高于 baseline 的 AUC 和 F1，说明频域-空域融合模型在压缩场景下仍有优势。q30 下，fusion_v3 的 AUC/F1 为 0.8928/0.8135，略高于 fusion_v2 的 0.8922/0.8096；但 fusion_v3 的 Recall 为 0.7963，低于 fusion_v2 的 0.8073，说明固定 DCT 三频带在强压缩下对 F1 有帮助，但 fake 召回仍不够稳定。
 
+### 3.6 fusion_v2 阈值敏感性测试
+
+本轮基于 `fusion_v2` 在 original test split 上的 fake probability 输出，扫描 0.20 到 0.80 的二分类判定阈值。完整结果见 `docs/threshold_analysis.md`。
+
+| threshold | Accuracy | Precision | Recall | F1 | FP | FN | 判断 |
+|---:|---:|---:|---:|---:|---:|---:|---|
+| 0.35 | 0.8297 | 0.8079 | 0.8642 | 0.8351 | 112 | 74 | F1 最高，可作 low/medium 风险分界 |
+| 0.40 | 0.8297 | 0.8111 | 0.8587 | 0.8342 | 109 | 77 | Recall 较高但误报增加 |
+| 0.50 | 0.8333 | 0.8259 | 0.8440 | 0.8348 | 97 | 85 | 默认二分类阈值 |
+| 0.65 | 0.8342 | 0.8370 | 0.8294 | 0.8332 | 88 | 93 | 更保守，误报更少 |
+| 0.80 | 0.8342 | 0.8500 | 0.8110 | 0.8300 | 78 | 103 | Precision 最高但漏检增加 |
+
+结果显示，默认二分类阈值 0.50 已经较稳定；threshold=0.35 时，Recall 从 0.8440 提升到 0.8642，FN 从 85 降到 74，但 FP 从 97 增加到 112。考虑到 real 误报展示影响，系统不把 0.35 直接作为 fake 结论阈值，而是保留 `fake_probability`，并将 0.35/0.80 作为 low、medium、high 风险等级边界。
+
 ## 4. 结果分析
 
 初版实验中，RGB baseline 的整体表现明显优于 fusion_fft。baseline 的 test AUC 为 0.8554，test F1 为 0.7973；fusion_fft 的 test AUC 为 0.7617，test F1 为 0.6980。
@@ -173,6 +187,8 @@ RGB spatial branch
 进一步参考文献中的 DCT 频带建模思想后，实现了 fusion_v3。fusion_v3 的三 seed 平均 AUC 略高于 fusion_v2，但 Recall 和 F1 低于 fusion_v2，说明固定 DCT 三频带对判别边界有帮助，但对 fake 样本召回不够稳定。
 
 JPEG 压缩鲁棒性测试进一步表明，压缩会降低模型性能，尤其在 q30 强压缩下更明显。fusion_v2 在 q30 下取得 0.8922 的 AUC 和 0.8096 的 F1，fusion_v3 取得 0.8928 的 AUC 和 0.8135 的 F1，均高于 baseline 的 0.8493 和 0.7794，说明频域-空域融合模型在压缩场景中仍保留优势。但 fusion_v2 的 Recall 从 0.8440 降至 0.8073，fusion_v3 的 Recall 从 0.8202 降至 0.7963，提示高频伪影和固定 DCT 频带线索都会受到强压缩影响。
+
+阈值敏感性测试说明，模型输出的 fake probability 可以在业务层根据风险偏好进行解释。默认 threshold=0.50 适合论文主实验对比；threshold=0.35 能将 fake 漏检数从 85 降到 74，但会增加 real 误报。因此系统展示层采用“伪造概率 + 风险等级”为主，`label` 只保留为模型二分类结果。
 
 因此，论文或答辩中应表述为“带来一定提升”，不能表述为“显著提升”。当前推荐采用 `fusion_v2 + spatial checkpoint + freeze 3 epochs + lr=5e-4` 作为频域-空域融合主模型，同时将 fusion_v3 作为 DCT 频带建模消融实验和后续改进依据。
 

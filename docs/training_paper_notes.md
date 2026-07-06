@@ -375,6 +375,24 @@ model/gradcam/fusion_v2_fake_demo/
 
 > 为增强系统检测结果的可解释性，本文引入 Grad-CAM 方法生成可疑区域热力图。系统以模型对 fake 类的输出作为目标分数，对 RGB 空域分支最后一层特征图进行反向传播，计算各通道对分类结果的贡献权重，并生成伪彩色热力图。热力图被叠加到输入人脸图像上，用于展示模型在进行伪造判别时更关注的局部区域。需要说明的是，该热力图反映的是模型关注区域，并不等同于精确篡改掩码，因此主要用于辅助解释检测结果和前端可视化展示。
 
+### 5.7 阈值敏感性测试
+
+本轮基于 `fusion_v2` 在 test split 上的 fake probability 输出，进一步测试不同二分类阈值对 Precision、Recall 和 F1 的影响。该实验不重新训练模型，只改变概率映射为 real/fake 的分析阈值，并为业务层风险等级边界提供依据。
+
+关键结果：
+
+| threshold | Accuracy | Precision | Recall | F1 | FP | FN |
+|---:|---:|---:|---:|---:|---:|---:|
+| 0.35 | 0.8297 | 0.8079 | 0.8642 | 0.8351 | 112 | 74 |
+| 0.40 | 0.8297 | 0.8111 | 0.8587 | 0.8342 | 109 | 77 |
+| 0.50 | 0.8333 | 0.8259 | 0.8440 | 0.8348 | 97 | 85 |
+| 0.65 | 0.8342 | 0.8370 | 0.8294 | 0.8332 | 88 | 93 |
+| 0.80 | 0.8342 | 0.8500 | 0.8110 | 0.8300 | 78 | 103 |
+
+可直接写入论文的表述：
+
+> 为进一步分析模型输出阈值对检测性能的影响，本文基于 `fusion_v2` 在测试集上的 fake probability 输出进行阈值敏感性测试。结果表明，默认二分类阈值 0.50 下模型 F1 为 0.8348，Recall 为 0.8440；当阈值降低到 0.35 时，Recall 提升到 0.8642，F1 达到 0.8351，同时 fake 漏检数从 85 降至 74，但 real 误报数从 97 增加到 112。综合考虑误报展示和反诈骗场景中的漏检风险，系统最终保留 real/fake 二分类 label 和连续 fake probability，并在业务层将概率映射为 low、medium、high 三档风险等级。其中 medium 表示建议人工复核，不等同于伪造结论。
+
 ## 6. 论文中建议采用的结论口径
 
 推荐写法：
@@ -399,6 +417,7 @@ model/gradcam/fusion_v2_fake_demo/
 | 消融分析表 | RGB baseline、初版 FFT concat、fusion_v2 高频 FFT gating、fusion_v3 DCT 三频带对比 | 同上 |
 | 鲁棒性测试表 | JPEG quality 95/75/50/30 下的 AUC、Recall 和 F1 变化 | `model/robustness/jpeg/metrics_by_quality.csv`、`docs/jpeg_robustness_results.md` |
 | 可解释性展示图 | 原图、Grad-CAM 热力图、叠加图三列对比 | `model/gradcam/fusion_v2_demo_contact_sheet.jpg`、`docs/gradcam_visualization.md` |
+| 阈值敏感性表 | 不同 fake probability 阈值下的 Precision、Recall、F1 和 FP/FN | `model/thresholds/fusion_v2_original/metrics_by_threshold.csv`、`docs/threshold_analysis.md` |
 
 建议论文正文优先放“数据集划分表”和“指标对比表”。训练曲线可以放在实验分析小节，用来说明 early stopping 和模型收敛情况。
 
@@ -431,8 +450,11 @@ model/gradcam/fusion_v2_fake_demo/
 | `model/summary/training_curves.svg` | 训练曲线图 |
 | `training/evaluate_jpeg_robustness.py` | JPEG 压缩鲁棒性评估脚本 |
 | `training/gradcam.py` | Grad-CAM 可解释性热力图生成脚本 |
+| `training/evaluate_thresholds.py` | 阈值敏感性测试脚本 |
 | `model/robustness/jpeg/metrics_by_quality.csv` | JPEG 压缩鲁棒性指标表 |
+| `model/thresholds/fusion_v2_original/metrics_by_threshold.csv` | 阈值敏感性指标表 |
 | `model/gradcam/fusion_v2_demo_contact_sheet.jpg` | Grad-CAM 示例联系图 |
 | `docs/jpeg_robustness_results.md` | JPEG 鲁棒性实验记录 |
 | `docs/gradcam_visualization.md` | Grad-CAM 可视化说明 |
+| `docs/threshold_analysis.md` | 阈值敏感性测试记录 |
 | `docs/experiment_results.md` | 已整理的简版实验结果 |

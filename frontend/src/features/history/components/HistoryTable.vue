@@ -3,7 +3,7 @@
     <div class="row head">
       <span>缩略图</span>
       <span>文件名</span>
-      <span>结论</span>
+      <span>模型结果</span>
       <span>伪造概率</span>
       <span>风险等级</span>
       <span>检测时间</span>
