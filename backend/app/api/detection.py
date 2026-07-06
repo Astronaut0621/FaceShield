@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, UploadFile
+from fastapi import APIRouter, Depends, Form, UploadFile
 
 from app.api.dependencies import get_current_user, get_detection_service, get_detection_workflow_service
 from app.models.user import User
@@ -25,10 +25,15 @@ def start_detection_by_file(
 @router.post("/upload-and-detect")
 async def upload_and_detect(
     file: UploadFile,
+    model_id: int | None = Form(None),
     current_user: User = Depends(get_current_user),
     service: DetectionWorkflowService = Depends(get_detection_workflow_service),
 ):
-    workflow_result = await service.upload_and_detect(file, user_id=current_user.id)
+    workflow_result = await service.upload_and_detect(
+        file,
+        user_id=current_user.id,
+        model_id=model_id,
+    )
     data = serialize_detection_result(workflow_result.detection_result, workflow_result.file_record)
     return success(data, message="Detection completed.")
 

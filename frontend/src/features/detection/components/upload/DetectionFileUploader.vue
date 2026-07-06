@@ -1,5 +1,5 @@
 <template>
-  <section class="uploader">
+  <section class="uploader" :class="{ large }">
     <div
       class="drop-zone"
       :class="{ active: dragging, disabled: loading, 'has-file': previewUrl }"
@@ -46,7 +46,8 @@ import { computed, ref, watch } from 'vue'
 
 const props = defineProps({
   modelValue: File,
-  loading: Boolean
+  loading: Boolean,
+  large: Boolean
 })
 
 const emit = defineEmits(['update:modelValue', 'submit'])
@@ -195,6 +196,36 @@ function clearFile() {
 .uploader-actions {
   display: grid;
   gap: 8px;
+  justify-items: center;
+  text-align: center;
+}
+
+.uploader.large .drop-zone {
+  min-height: 380px;
+}
+
+.uploader.large .drop-content {
+  padding: 48px 32px;
+}
+
+.uploader.large .drop-icon {
+  font-size: 48px;
+}
+
+.uploader.large .drop-content p {
+  font-size: 18px;
+}
+
+.uploader.large .preview {
+  max-width: min(100%, 560px);
+  max-height: 360px;
+}
+
+.uploader.large .primary-btn {
+  width: 100%;
+  max-width: 320px;
+  height: 50px;
+  font-size: 16px;
 }
 
 .primary-btn {

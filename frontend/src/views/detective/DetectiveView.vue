@@ -5,7 +5,7 @@
         <p class="banner-kicker">FaceShield · AI 换脸检测</p>
         <h1>图片检测工作台</h1>
         <p class="banner-desc">
-          上传待检测人脸图片，系统将自动完成人脸裁剪、频域-空域融合推理，
+          上传待检测人脸图片，选择检测模型后，系统将自动完成人脸裁剪、频域-空域融合推理，
           并输出伪造概率、风险等级与可疑区域热力图。
         </p>
         <div class="banner-tags">
@@ -15,39 +15,46 @@
       <BackHomeLink />
     </header>
 
-    <div class="detective-grid">
-      <div class="upload-column">
-        <div class="upload-card">
-          <h2>上传待检测图片</h2>
-          <DetectionFileUploader
-            v-model="detectionStore.currentFile"
-            :loading="loading"
-            @submit="submit"
-          />
+    <div class="upload-section">
+      <div class="upload-card">
+        <h2>上传待检测图片</h2>
 
-          <Transition name="fade">
-            <div v-if="loading" class="detecting-banner">
-              <span class="spinner" />
-              <div>
-                <strong>正在分析图片</strong>
-                <p>频域特征提取 → 空域纹理分析 → 融合推理中…</p>
-              </div>
+        <ModelSelector
+          v-model="selectedModelId"
+          :disabled="loading"
+          @update:model-value="onModelChange"
+        />
+
+        <DetectionFileUploader
+          v-model="detectionStore.currentFile"
+          large
+          :loading="loading"
+          @submit="submit"
+        />
+
+        <Transition name="fade">
+          <div v-if="loading" class="detecting-banner">
+            <span class="spinner" />
+            <div>
+              <strong>正在分析图片</strong>
+              <p>频域特征提取 → 空域纹理分析 → 融合推理中…</p>
             </div>
-          </Transition>
+          </div>
+        </Transition>
 
-          <InlineError :message="error" />
-        </div>
+        <InlineError :message="error" />
       </div>
-
-      <DetectionGuidePanel />
     </div>
+
+    <DetectionGuidePanel class="guide-below" />
   </section>
 </template>
 
 <script setup>
-import { watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import DetectionFileUploader from '@/features/detection/components/upload/DetectionFileUploader.vue'
+import ModelSelector from '@/features/detection/components/upload/ModelSelector.vue'
 import DetectionGuidePanel from '@/features/detection/components/DetectionGuidePanel.vue'
 import BackHomeLink from '@/shared/components/BackHomeLink.vue'
 import InlineError from '@/shared/components/InlineError.vue'
@@ -58,16 +65,21 @@ import { detectionStore } from '@/stores/detection.store'
 
 const router = useRouter()
 const { loading, error, run } = useAsyncTask()
+const selectedModelId = ref(detectionStore.selectedModelId)
 
 const tags = ['频域 FFT', '空域 CNN', 'Grad-CAM', '风险评级']
 
 watch(loading, value => detectionStore.setLoading(value))
 watch(error, value => detectionStore.setError(value))
 
+function onModelChange(modelId) {
+  detectionStore.setSelectedModelId(modelId || null)
+}
+
 async function submit() {
   if (!detectionStore.currentFile) return
   const result = await run(
-    () => uploadAndDetect(detectionStore.currentFile),
+    () => uploadAndDetect(detectionStore.currentFile, selectedModelId.value),
     '检测失败，请稍后重试。'
   )
   if (!result) return
@@ -78,7 +90,8 @@ async function submit() {
 
 <style scoped>
 .detective-page {
-  max-width: 1100px;
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
 .detective-banner {
@@ -86,7 +99,7 @@ async function submit() {
   align-items: flex-start;
   justify-content: space-between;
   gap: 20px;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
   padding: 28px 32px;
   border-radius: 16px;
   background:
@@ -111,7 +124,7 @@ async function submit() {
 
 .banner-desc {
   margin: 0 0 16px;
-  max-width: 520px;
+  max-width: 560px;
   font-size: 14px;
   line-height: 1.7;
   opacity: 0.9;
@@ -132,24 +145,32 @@ async function submit() {
   font-weight: 500;
 }
 
-.detective-grid {
-  display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  gap: 20px;
-  align-items: start;
+.upload-section {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
 }
 
 .upload-card {
+  width: 100%;
+  max-width: 1000px;
   background: #fff;
   border: 1px solid #dbe3ec;
-  border-radius: 14px;
-  padding: 24px;
+  border-radius: 16px;
+  padding: 32px 36px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06);
 }
 
 .upload-card h2 {
-  margin: 0 0 20px;
-  font-size: 18px;
+  margin: 0 0 8px;
+  font-size: 20px;
   color: #0f172a;
+  text-align: center;
+}
+
+.guide-below {
+  max-width: 760px;
+  margin: 0 auto;
 }
 
 .detecting-banner {
@@ -209,8 +230,8 @@ async function submit() {
     padding: 24px 20px;
   }
 
-  .detective-grid {
-    grid-template-columns: 1fr;
+  .upload-card {
+    padding: 24px 20px;
   }
 }
 </style>

@@ -11,7 +11,6 @@
     </div>
 
     <section id="features" class="features-section">
-      <h2>核心能力</h2>
       <div class="features-grid">
         <article v-for="item in features" :key="item.title" class="feature-card">
           <span class="feature-icon">{{ item.icon }}</span>
@@ -27,29 +26,6 @@
 import HomeDetectBar from '@/features/home/components/HomeDetectBar.vue'
 import HomeHero from '@/features/home/components/HomeHero.vue'
 import HomeNav from '@/features/home/components/HomeNav.vue'
-
-const features = [
-  {
-    icon: '🔬',
-    title: '频域特征分析',
-    desc: '基于 FFT 幅度谱捕捉 DeepFake 高频伪影与压缩残留。'
-  },
-  {
-    icon: '🖼️',
-    title: '空域纹理检测',
-    desc: 'CNN 提取人脸局部纹理，识别换脸边界与融合痕迹。'
-  },
-  {
-    icon: '🌡️',
-    title: 'Grad-CAM 热力图',
-    desc: '可视化模型关注区域，定位最可疑的伪造部位。'
-  },
-  {
-    icon: '📊',
-    title: '风险等级评估',
-    desc: '综合伪造概率输出低/中/高风险，辅助快速决策。'
-  }
-]
 </script>
 
 <style scoped>
