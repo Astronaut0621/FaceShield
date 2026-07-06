@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 
+from app.algorithm.status import get_algorithm_status
 from app.repositories.model_repository import ModelRepository
 from app.serializers.model_serializer import serialize_model_version
 
@@ -12,5 +13,6 @@ class ModelService:
         model = self.repository.get_active()
         if model is None:
             return None
-        return serialize_model_version(model)
-
+        data = serialize_model_version(model)
+        data["algorithm"] = get_algorithm_status()
+        return data

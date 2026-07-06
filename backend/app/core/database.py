@@ -27,6 +27,7 @@ def get_db() -> Generator[Session, None, None]:
 
 
 def init_db() -> None:
+    from app.algorithm.config import algorithm_settings
     from app.core.config import settings
     from app.core.security import hash_password
     from app.models import DetectionResult, DetectionTask, FileRecord, ModelVersion, User
@@ -48,13 +49,13 @@ def init_db() -> None:
             )
             db.commit()
 
-        active_model = db.scalar(
+        mock_model = db.scalar(
             select(ModelVersion).where(
                 ModelVersion.model_name == "FaceShield-MockNet",
                 ModelVersion.version == "v0.1",
             )
         )
-        if active_model is None:
+        if mock_model is None:
             db.add(
                 ModelVersion(
                     model_name="FaceShield-MockNet",
@@ -64,6 +65,35 @@ def init_db() -> None:
                     is_active=True,
                 )
             )
+            db.commit()
+
+        fusion_model = db.scalar(
+            select(ModelVersion).where(
+                ModelVersion.model_name == algorithm_settings.model_name,
+                ModelVersion.version == algorithm_settings.model_version,
+            )
+        )
+        if fusion_model is None:
+            fusion_model = ModelVersion(
+                model_name=algorithm_settings.model_name,
+                version=algorithm_settings.model_version,
+                description="Frequency-spatial fusion model using PaddlePaddle fusion_v2 checkpoint.",
+                model_path=algorithm_settings.model_path,
+                is_active=False,
+            )
+            db.add(fusion_model)
+            db.commit()
+
+        active_name = "FaceShield-MockNet" if algorithm_settings.backend == "mock" else algorithm_settings.model_name
+        active_version = "v0.1" if algorithm_settings.backend == "mock" else algorithm_settings.model_version
+        models = db.scalars(select(ModelVersion)).all()
+        changed = False
+        for model in models:
+            should_be_active = model.model_name == active_name and model.version == active_version
+            if model.is_active != should_be_active:
+                model.is_active = should_be_active
+                changed = True
+        if changed:
             db.commit()
 
 

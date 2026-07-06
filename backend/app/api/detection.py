@@ -6,7 +6,6 @@ from app.schemas.detection_schema import DetectionStartRequest
 from app.serializers.detection_serializer import serialize_detection_result
 from app.services.detection_service import DetectionService
 from app.services.detection_workflow_service import DetectionWorkflowService
-from app.serializers.file_serializer import serialize_file_record
 from app.serializers.record_serializer import serialize_detection_record
 from app.utils.response import success
 
@@ -30,8 +29,7 @@ async def upload_and_detect(
     service: DetectionWorkflowService = Depends(get_detection_workflow_service),
 ):
     workflow_result = await service.upload_and_detect(file, user_id=current_user.id)
-    data = serialize_detection_result(workflow_result.detection_result)
-    data["file"] = serialize_file_record(workflow_result.file_record)
+    data = serialize_detection_result(workflow_result.detection_result, workflow_result.file_record)
     return success(data, message="Detection completed.")
 
 

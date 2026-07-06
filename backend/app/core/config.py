@@ -10,6 +10,7 @@ class Settings:
     UPLOAD_DIR = STORAGE_DIR / "uploads"
     REPORT_DIR = STORAGE_DIR / "reports"
     HEATMAP_DIR = STORAGE_DIR / "heatmaps"
+    CROP_DIR = STORAGE_DIR / "crops"
 
     DATABASE_URL = os.getenv(
         "DATABASE_URL",
@@ -37,6 +38,7 @@ class Settings:
             self.UPLOAD_DIR,
             self.REPORT_DIR,
             self.HEATMAP_DIR,
+            self.CROP_DIR,
         ]:
             directory.mkdir(parents=True, exist_ok=True)
 

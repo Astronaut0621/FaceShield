@@ -1,7 +1,6 @@
 import hashlib
 import random
 
-from app.algorithm.config import algorithm_settings
 from app.algorithm.contracts.types import DetectionInput, DetectionOutput
 
 
@@ -26,7 +25,6 @@ class MockDetectionEngine:
             frequency_score=frequency_score,
             spatial_score=spatial_score,
             heatmap_path=None,
-            model_name=algorithm_settings.model_name,
-            model_version=algorithm_settings.model_version,
+            model_name="FaceShield-MockNet",
+            model_version="v0.1",
         )
-

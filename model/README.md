@@ -53,6 +53,18 @@ python training/predict.py \
 
 For CPU-only backend development, use `--device cpu`.
 
+The FastAPI backend can now load this deployment directory directly. Start the
+backend with:
+
+```powershell
+$env:FACESHIELD_ALGORITHM_BACKEND='paddle'
+cd backend
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+See `docs/backend_model_integration.md` for the full backend-model integration
+workflow and troubleshooting notes.
+
 ## Local Training Outputs
 
 Full training runs remain local under `model/outputs/` and are ignored by Git.

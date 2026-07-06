@@ -1,5 +1,6 @@
 from app.algorithm.contracts.engine import DetectionEngine
 from app.algorithm.models.mock_engine import MockDetectionEngine
+from app.algorithm.models.paddle_engine import PaddleDetectionEngine
 
 
 class EngineRegistry:
@@ -18,4 +19,4 @@ class EngineRegistry:
 
 engine_registry = EngineRegistry()
 engine_registry.register(MockDetectionEngine())
-
+engine_registry.register(PaddleDetectionEngine())

@@ -1,33 +1,115 @@
 # FaceShield Backend
 
-FastAPI backend for the FaceShield prototype. The default database is local SQLite for quick development. To connect openGauss, set `DATABASE_URL` to a PostgreSQL-compatible SQLAlchemy URL.
+FaceShield 后端基于 FastAPI 构建，负责登录认证、图片上传、算法推理、结果入库、历史记录查询和静态文件访问。当前后端已经支持 `mock` 与 `paddle` 两种算法后端，默认仍使用 `mock`，便于无模型环境启动；设置环境变量后可加载 `model/deploy/fusion_v2` 中的 PaddlePaddle 权重。
 
-## Run
+## 启动
 
 ```bash
 pip install -r requirements.txt
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-Health check:
-
-```text
-GET http://localhost:8000/api/health
-```
-
-API docs:
+API 文档：
 
 ```text
 http://localhost:8000/docs
 ```
 
-## openGauss Configuration
+健康检查：
+
+```text
+GET http://localhost:8000/api/health
+```
+
+健康检查会返回：
+
+- 服务状态
+- 当前算法后端
+- 模型名称和版本
+- 模型权重和配置文件是否存在
+- PaddlePaddle 是否可用
+- OpenCV 是否可用
+- 当前算法后端是否 ready
+
+## 数据库
+
+默认使用本地 SQLite：
+
+```text
+backend/faceshield.db
+```
+
+连接 openGauss 时设置：
 
 ```text
 DATABASE_URL=postgresql+psycopg2://gaussdb:your_password@localhost:5432/faceshield
 ```
 
-## Initial APIs
+openGauss 初始化 SQL 位于：
+
+```text
+database/sql/001_init_opengauss.sql
+```
+
+## 算法后端
+
+### mock 后端
+
+默认值：
+
+```text
+FACESHIELD_ALGORITHM_BACKEND=mock
+```
+
+mock 后端不加载模型，使用稳定伪随机结果，适合前端联调、接口演示和无深度学习环境的开发。
+
+### Paddle 后端
+
+真实模型推理使用：
+
+```powershell
+$env:FACESHIELD_ALGORITHM_BACKEND='paddle'
+```
+
+默认模型文件：
+
+```text
+../model/deploy/fusion_v2/best.pdparams
+../model/deploy/fusion_v2/config.json
+```
+
+可通过环境变量覆盖：
+
+```text
+FACESHIELD_MODEL_PATH=../model/deploy/fusion_v2/best.pdparams
+FACESHIELD_MODEL_CONFIG_PATH=../model/deploy/fusion_v2/config.json
+```
+
+当前已验证 CPU 版 `paddlepaddle 3.3.1` 可加载 `fusion_v2` 权重并完成单图推理。Paddle 首次 import 可能写用户缓存目录，后端在 Paddle 引擎中将缓存重定向到：
+
+```text
+backend/storage/paddle_home
+```
+
+## 检测流程
+
+```text
+校验登录状态
+-> 校验上传文件扩展名、大小和图片内容
+-> 保存原始图片
+-> OpenCV Haar Cascade 人脸检测
+-> 检测失败时中心裁剪兜底
+-> resize 到 224x224
+-> 调用 mock 或 Paddle 检测引擎
+-> 计算风险等级
+-> 生成可疑区域热力图
+-> 写入检测任务和检测结果
+-> 返回前端展示字段
+```
+
+说明：当前热力图为降级可视化实现，用于展示链路和结果解释占位；严格 Grad-CAM 尚未接入。
+
+## 主要接口
 
 - `GET /api/health`
 - `POST /api/auth/login`
@@ -38,7 +120,7 @@ DATABASE_URL=postgresql+psycopg2://gaussdb:your_password@localhost:5432/faceshie
 - `GET /api/records/{id}`
 - `GET /api/model-version`
 
-Compatibility APIs are still available for earlier frontend experiments:
+兼容早期前端实验的接口仍保留：
 
 - `POST /api/files/upload`
 - `POST /api/detection/start`
@@ -46,32 +128,76 @@ Compatibility APIs are still available for earlier frontend experiments:
 - `GET /api/history/list`
 - `GET /api/history/{task_id}`
 
-All business APIs except `/api/health` and `/api/auth/login` require:
+除 `/api/health` 和 `/api/auth/login` 外，业务接口需要：
 
 ```text
 Authorization: Bearer <access_token>
 ```
 
-Demo account:
+演示账号：
 
 ```text
 username: demo
 password: demo123456
 ```
 
-## Backend Layers
+## 检测结果字段
 
-```text
-api/           HTTP routing and request dependency wiring
-services/      Use-case orchestration
-repositories/  SQLAlchemy data access
-domain/        Business enums, policies, and application exceptions
-serializers/   ORM-to-response mapping
-models/        SQLAlchemy table models
-schemas/       Pydantic request/response schemas
-algorithm/     Stable detector adapter interface
-core/          App factory, config, database, logging, exception handlers
-utils/         Small cross-cutting helpers
+检测接口和历史详情会返回前端需要的核心字段：
+
+```json
+{
+  "task_id": 1,
+  "file_id": 1,
+  "label": "fake",
+  "fake_probability": 0.86,
+  "confidence": 0.92,
+  "risk_level": "high",
+  "frequency_score": 0.82,
+  "spatial_score": 0.88,
+  "original_image_url": "/storage/uploads/example.jpg",
+  "face_crop_url": "/storage/crops/example.jpg",
+  "face_detected": true,
+  "heatmap_url": "/storage/heatmaps/example.png",
+  "model_name": "FaceShield-FusionV2",
+  "model_version": "fusion_v2-202607",
+  "created_at": "2026-07-06 16:00:00"
+}
 ```
 
-Keep new features aligned with these boundaries: routes should not query the database directly, services should not build HTTP responses, and repositories should not know about FastAPI.
+风险等级规则：
+
+- `< 0.4`：`low`
+- `0.4 - 0.7`：`medium`
+- `>= 0.7`：`high`
+
+## 后端分层
+
+```text
+api/           HTTP 路由和依赖注入
+services/      业务用例编排
+repositories/  SQLAlchemy 数据访问
+domain/        枚举、策略和应用异常
+serializers/   ORM 到响应字典的转换
+models/        SQLAlchemy 表模型
+schemas/       Pydantic 请求/响应模型
+algorithm/     算法适配层、推理引擎和预处理/后处理
+core/          应用工厂、配置、数据库、日志、异常处理
+utils/         通用工具
+```
+
+约定：路由层不直接查询数据库，服务层不构造 HTTP 响应，仓储层不依赖 FastAPI。
+
+## 常用验证命令
+
+```bash
+python -m compileall app
+python -c "from app.main import app; print(app.title); print(len(app.routes))"
+```
+
+查看 Paddle 后端状态：
+
+```powershell
+$env:FACESHIELD_ALGORITHM_BACKEND='paddle'
+python -c "from app.algorithm.status import get_algorithm_status; print(get_algorithm_status())"
+```

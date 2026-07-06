@@ -116,3 +116,21 @@ WHERE NOT EXISTS (
     SELECT 1 FROM model_version
     WHERE model_name = 'FaceShield-MockNet' AND version = 'v0.1'
 );
+
+INSERT INTO model_version (
+    model_name,
+    version,
+    description,
+    model_path,
+    is_active
+)
+SELECT
+    'FaceShield-FusionV2',
+    'fusion_v2-202607',
+    'Frequency-spatial fusion model using PaddlePaddle fusion_v2 checkpoint.',
+    'model/deploy/fusion_v2/best.pdparams',
+    FALSE
+WHERE NOT EXISTS (
+    SELECT 1 FROM model_version
+    WHERE model_name = 'FaceShield-FusionV2' AND version = 'fusion_v2-202607'
+);

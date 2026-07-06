@@ -1,9 +1,10 @@
 from app.models.detection_result import DetectionResult
+from app.models.file_record import FileRecord
 from app.utils.time_utils import format_datetime
 
 
-def serialize_detection_result(result: DetectionResult) -> dict:
-    return {
+def serialize_detection_result(result: DetectionResult, file_record: FileRecord | None = None) -> dict:
+    data = {
         "task_id": result.task_id,
         "file_id": result.file_id,
         "label": result.label,
@@ -20,3 +21,19 @@ def serialize_detection_result(result: DetectionResult) -> dict:
         "model_version": result.model_version,
         "created_at": format_datetime(result.created_at),
     }
+    if file_record is not None:
+        data.update(
+            {
+                "original_filename": file_record.original_filename,
+                "original_image_url": file_record.file_url,
+                "file": {
+                    "file_id": file_record.id,
+                    "original_filename": file_record.original_filename,
+                    "stored_filename": file_record.stored_filename,
+                    "file_url": file_record.file_url,
+                    "file_type": file_record.file_type,
+                    "file_size": file_record.file_size,
+                },
+            }
+        )
+    return data
