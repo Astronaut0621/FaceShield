@@ -5,7 +5,7 @@ from paddle import nn
 import paddle.nn.functional as F
 
 
-FUSION_MODELS = {"fusion_fft", "fusion_v2"}
+FUSION_MODELS = {"fusion_fft", "fusion_v2", "fusion_v3"}
 
 
 def is_fusion_model(model_name: str) -> bool:
@@ -86,10 +86,16 @@ class FusionFFTNet(nn.Layer):
 
 
 class FusionGatedFFTNet(nn.Layer):
-    def __init__(self, num_classes: int = 2, feature_dim: int = 128, dropout: float = 0.3) -> None:
+    def __init__(
+        self,
+        num_classes: int = 2,
+        feature_dim: int = 128,
+        dropout: float = 0.3,
+        frequency_channels: int = 1,
+    ) -> None:
         super().__init__()
         self.spatial_branch = TinyBackbone(in_channels=3, feature_dim=feature_dim)
-        self.frequency_branch = TinyBackbone(in_channels=1, feature_dim=feature_dim)
+        self.frequency_branch = TinyBackbone(in_channels=frequency_channels, feature_dim=feature_dim)
         self.gate = nn.Sequential(
             nn.Linear(feature_dim * 2, feature_dim),
             nn.ReLU(),
@@ -124,4 +130,6 @@ def build_model(model_name: str, dropout: float = 0.3, feature_dim: int = 128) -
         return FusionFFTNet(dropout=dropout, feature_dim=feature_dim)
     if model_name == "fusion_v2":
         return FusionGatedFFTNet(dropout=dropout, feature_dim=feature_dim)
+    if model_name == "fusion_v3":
+        return FusionGatedFFTNet(dropout=dropout, feature_dim=feature_dim, frequency_channels=3)
     raise ValueError(f"Unsupported model: {model_name}")

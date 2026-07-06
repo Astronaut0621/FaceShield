@@ -17,7 +17,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--image", type=Path, required=True)
     parser.add_argument("--checkpoint", type=Path, required=True)
     parser.add_argument("--config", type=Path, default=None)
-    parser.add_argument("--model", choices=["baseline", "fusion_fft", "fusion_v2"], default=None)
+    parser.add_argument("--model", choices=["baseline", "fusion_fft", "fusion_v2", "fusion_v3"], default=None)
     parser.add_argument("--image-size", type=int, default=None)
     parser.add_argument("--dropout", type=float, default=None)
     parser.add_argument("--feature-dim", type=int, default=None)

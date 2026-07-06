@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import random
+from functools import lru_cache
 from pathlib import Path
 
 import numpy as np
@@ -52,14 +53,54 @@ def compute_highfreq_fft_tensor(image: Image.Image, low_radius_ratio: float = 0.
     return normalize_frequency_map(highfreq)
 
 
-def normalize_frequency_map(magnitude: np.ndarray) -> np.ndarray:
+@lru_cache(maxsize=8)
+def dct_matrix(size: int) -> np.ndarray:
+    n = np.arange(size, dtype="float32")
+    k = n.reshape(-1, 1)
+    matrix = np.cos(np.pi * (2.0 * n + 1.0) * k / (2.0 * size)).astype("float32")
+    matrix[0, :] *= np.sqrt(1.0 / size)
+    matrix[1:, :] *= np.sqrt(2.0 / size)
+    return matrix
+
+
+def compute_dct_triband_tensor(
+    image: Image.Image,
+    low_cutoff: float = 0.25,
+    mid_cutoff: float = 0.55,
+) -> np.ndarray:
+    gray = np.asarray(image.convert("L"), dtype="float32") / 255.0
+    height, width = gray.shape
+    dct_h = dct_matrix(height)
+    dct_w = dct_matrix(width)
+    coeff = dct_h @ gray @ dct_w.T
+    magnitude = np.log1p(np.abs(coeff)).astype("float32")
+
+    yy, xx = np.ogrid[:height, :width]
+    y = yy.astype("float32") / max(height - 1, 1)
+    x = xx.astype("float32") / max(width - 1, 1)
+    radius = np.sqrt(x**2 + y**2) / np.sqrt(2.0)
+
+    masks = [
+        radius < low_cutoff,
+        (radius >= low_cutoff) & (radius < mid_cutoff),
+        radius >= mid_cutoff,
+    ]
+    bands = []
+    for mask in masks:
+        bands.append(normalize_single_map(magnitude * mask.astype("float32")))
+    return np.stack(bands, axis=0).astype("float32")
+
+
+def normalize_single_map(magnitude: np.ndarray) -> np.ndarray:
     min_value = float(magnitude.min())
     max_value = float(magnitude.max())
     if max_value > min_value:
-        magnitude = (magnitude - min_value) / (max_value - min_value)
-    else:
-        magnitude = np.zeros_like(magnitude, dtype="float32")
-    return magnitude[np.newaxis, :, :].astype("float32")
+        return ((magnitude - min_value) / (max_value - min_value)).astype("float32")
+    return np.zeros_like(magnitude, dtype="float32")
+
+
+def normalize_frequency_map(magnitude: np.ndarray) -> np.ndarray:
+    return normalize_single_map(magnitude)[np.newaxis, :, :].astype("float32")
 
 
 def compute_frequency_tensor(image: Image.Image, mode: str) -> np.ndarray:
@@ -67,6 +108,8 @@ def compute_frequency_tensor(image: Image.Image, mode: str) -> np.ndarray:
         return compute_fft_tensor(image)
     if mode == "fusion_v2":
         return compute_highfreq_fft_tensor(image)
+    if mode == "fusion_v3":
+        return compute_dct_triband_tensor(image)
     raise ValueError(f"Unsupported frequency mode: {mode}")
 
 
@@ -90,7 +133,7 @@ class FaceForgeryDataset(paddle.io.Dataset):
         augment: bool = False,
     ) -> None:
         super().__init__()
-        if mode not in {"rgb", "fusion_fft", "fusion_v2"}:
+        if mode not in {"rgb", "fusion_fft", "fusion_v2", "fusion_v3"}:
             raise ValueError(f"Unsupported dataset mode: {mode}")
         self.rows = rows
         self.data_root = Path(data_root)
@@ -115,7 +158,7 @@ class FaceForgeryDataset(paddle.io.Dataset):
 
         rgb = pil_to_rgb_tensor(image).astype("float32")
         label = np.array(int(row["label"]), dtype="int64")
-        if self.mode in {"fusion_fft", "fusion_v2"}:
+        if self.mode in {"fusion_fft", "fusion_v2", "fusion_v3"}:
             frequency = compute_frequency_tensor(image, self.mode)
             return rgb, frequency, label
         return rgb, label

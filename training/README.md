@@ -29,18 +29,22 @@ fake -> 1
 
 ## Models
 
-Three model types are supported:
+Four model types are supported:
 
 ```text
 baseline   : RGB face crop -> lightweight CNN -> classifier
 fusion_fft : RGB branch + FFT spectrum branch -> feature concat -> classifier
 fusion_v2  : RGB branch + high-frequency FFT branch -> gated residual fusion -> classifier
+fusion_v3  : RGB branch + DCT low/mid/high bands -> gated residual fusion -> classifier
 ```
 
 `fusion_fft` is the first MVP model for the frequency-spatial fusion design.
 `fusion_v2` is the optimized fusion model. It suppresses the low-frequency FFT
 center region and uses a gate to control how much frequency feature is injected
 into the spatial feature.
+`fusion_v3` is a DCT-based follow-up experiment inspired by frequency-band
+fusion papers. It uses fixed low/mid/high DCT bands as a lightweight substitute
+for dynamic frequency partitioning.
 
 ## AutoDL Setup
 
@@ -112,6 +116,28 @@ python training/train.py \
   --freeze-spatial-epochs 3
 ```
 
+## Train DCT Frequency-Spatial Fusion
+
+This is the recommended next experiment after `fusion_v2`. It keeps the same
+gated residual fusion structure, but replaces the high-frequency FFT input with
+three DCT frequency bands.
+
+```bash
+cd /root/autodl-tmp/FaceShield
+python training/train.py \
+  --data-root data/ffpp_faces \
+  --manifest face_manifest_clean.csv \
+  --model fusion_v3 \
+  --output-dir outputs/fusion_v3_seed42 \
+  --device gpu \
+  --epochs 30 \
+  --batch-size 32 \
+  --lr 5e-4 \
+  --seed 42 \
+  --spatial-checkpoint outputs/baseline/best.pdparams \
+  --freeze-spatial-epochs 3
+```
+
 The training script writes:
 
 ```text
@@ -135,6 +161,69 @@ python training/predict.py \
 
 For backend development, use `model/deploy/fusion_v2` as the primary checkpoint
 directory. `model/deploy/baseline` is kept as a fallback model.
+
+## JPEG Robustness Evaluation
+
+The robustness script evaluates deployed checkpoints on the test split after
+in-memory JPEG re-encoding. It does not modify the original test images.
+
+```powershell
+.\.venv\Scripts\python.exe training\evaluate_jpeg_robustness.py `
+  --output-dir model\robustness\jpeg `
+  --qualities 95 75 50 30 `
+  --batch-size 32 `
+  --device cpu
+```
+
+By default, the script evaluates valid checkpoint directories under:
+
+```text
+model/deploy/baseline
+model/deploy/fusion_v2
+model/deploy/fusion_v3
+```
+
+If a model directory is missing, it is skipped. To evaluate another checkpoint,
+pass `--model-dir <path>` one or more times. The output directory contains:
+
+```text
+metrics_by_quality.csv
+metrics_by_quality.json
+predictions_by_quality.csv
+summary.md
+```
+
+## Grad-CAM Visualization
+
+Use `gradcam.py` to generate an explainability heatmap for one cropped face
+image. The heatmap is computed on the RGB spatial branch and overlaid on the
+input image. For fusion models, the frequency branch still participates in the
+classification score, but the displayed heatmap coordinates come from the RGB
+branch so they can be interpreted on the face image.
+
+```powershell
+.\.venv\Scripts\python.exe training\gradcam.py `
+  --image data\ffpp_faces\test\fake\035_036_000001.jpg `
+  --checkpoint model\deploy\fusion_v2\best.pdparams `
+  --config model\deploy\fusion_v2\config.json `
+  --output-dir model\gradcam\fusion_v2_fake_demo `
+  --target-class fake `
+  --device cpu
+```
+
+The script writes:
+
+```text
+model/gradcam/<run>/
+├─ input.jpg
+├─ heatmap.jpg
+├─ overlay.jpg
+└─ result.json
+```
+
+`overlay.jpg` is the recommended frontend display image. The heatmap indicates
+model attention for the selected class; it is not a pixel-level manipulation
+mask.
 
 ## Upload Scope
 

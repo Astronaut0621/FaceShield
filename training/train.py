@@ -22,7 +22,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Train FaceShield face forgery detector.")
     parser.add_argument("--data-root", type=Path, default=Path("data/ffpp_faces"))
     parser.add_argument("--manifest", default="face_manifest_clean.csv")
-    parser.add_argument("--model", choices=["baseline", "fusion_fft", "fusion_v2"], default="fusion_fft")
+    parser.add_argument("--model", choices=["baseline", "fusion_fft", "fusion_v2", "fusion_v3"], default="fusion_fft")
     parser.add_argument("--output-dir", type=Path, default=Path("outputs/fusion_fft"))
     parser.add_argument("--device", choices=["gpu", "cpu"], default="gpu")
     parser.add_argument("--image-size", type=int, default=224)
