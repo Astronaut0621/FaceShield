@@ -8,7 +8,7 @@ export const routeNames = {
 }
 
 export const navigationItems = [
-  { name: routeNames.home, path: '/', label: '首页', icon: '🏠' },
-  { name: routeNames.detective, path: '/detective', label: '图片检测', icon: '🔍' },
-  { name: routeNames.history, path: '/history', label: '历史记录', icon: '📋' }
+  { name: routeNames.home, path: '/', label: '首页', icon: 'H' },
+  { name: routeNames.detective, path: '/detective', label: '图片检测', icon: 'D' },
+  { name: routeNames.history, path: '/history', label: '历史记录', icon: 'R' }
 ]

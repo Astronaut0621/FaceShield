@@ -19,16 +19,20 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 36px;
+  min-height: 38px;
   padding: 0 14px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  background: #fff;
-  color: #334155;
+  border: 1px solid #bfd0c7;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.94);
+  color: #33463d;
   text-decoration: none;
   font-size: 14px;
-  font-weight: 500;
-  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  font-weight: 700;
+  transition:
+    border-color 0.16s ease,
+    color 0.16s ease,
+    background 0.16s ease,
+    transform 0.16s ease;
 }
 
 .back-home svg {
@@ -37,8 +41,9 @@
 }
 
 .back-home:hover {
-  border-color: #166534;
-  color: #166534;
-  background: #f0fdf4;
+  border-color: #087443;
+  color: #087443;
+  background: #e1f4eb;
+  transform: translateY(-1px);
 }
 </style>

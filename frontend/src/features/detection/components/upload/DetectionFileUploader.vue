@@ -15,7 +15,7 @@
         @change="onChange"
       />
       <div v-if="!previewUrl" class="drop-content">
-        <div class="drop-icon">📤</div>
+        <div class="drop-icon">IMG</div>
         <p>拖拽图片到此处，或点击选择文件</p>
         <span>支持 JPG / JPEG / PNG，单张图片检测</span>
       </div>
@@ -34,9 +34,9 @@
     <div class="uploader-actions">
       <button class="primary-btn" :disabled="!modelValue || loading" @click="$emit('submit')">
         <span v-if="loading" class="spinner" />
-        {{ loading ? '检测中，请稍候…' : '开始检测' }}
+        {{ loading ? '检测中，请稍候...' : '开始检测' }}
       </button>
-      <p class="hint">系统将融合频域与空域特征，分析是否存在 AI 换脸伪造痕迹</p>
+      <p class="hint">系统将融合频域与空域特征，分析是否存在 AI 换脸伪造痕迹。</p>
     </div>
   </section>
 </template>
@@ -112,21 +112,35 @@ function clearFile() {
 
 .drop-zone {
   position: relative;
-  min-height: 300px;
-  border: 2px dashed #94a3b8;
-  border-radius: 14px;
-  background: linear-gradient(180deg, #f8fafc 0%, #fff 100%);
-  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  min-height: 330px;
+  display: grid;
+  place-items: center;
+  border: 1.5px dashed #9fb8ad;
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(246, 250, 248, 0.9), rgba(255, 255, 255, 0.96)),
+    #fff;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
 .drop-zone.active {
-  border-color: #2563eb;
-  background: linear-gradient(180deg, #eff6ff 0%, #f0f9ff 100%);
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+  border-color: #087443;
+  background: #e1f4eb;
+  box-shadow: 0 0 0 5px rgba(8, 116, 67, 0.1);
+  transform: translateY(-1px);
+}
+
+.drop-zone.has-file {
+  border-style: solid;
+  background: #f6faf8;
 }
 
 .drop-zone.disabled {
-  opacity: 0.7;
+  opacity: 0.72;
   pointer-events: none;
 }
 
@@ -141,55 +155,74 @@ function clearFile() {
 .preview-wrap {
   display: grid;
   place-items: center;
-  gap: 8px;
-  padding: 32px 24px;
+  gap: 10px;
+  width: 100%;
+  padding: 34px 24px;
   text-align: center;
 }
 
 .drop-icon {
-  font-size: 36px;
+  width: 62px;
+  height: 62px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: #e1f4eb;
+  color: #065f36;
+  font-size: 13px;
+  font-weight: 900;
 }
 
 .drop-content p {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-  color: #1e293b;
+  margin: 8px 0 0;
+  font-size: 17px;
+  font-weight: 800;
+  color: #10231b;
 }
 
 .drop-content span {
-  color: #64748b;
+  color: #60756b;
   font-size: 13px;
 }
 
 .preview {
-  max-width: min(100%, 420px);
-  max-height: 280px;
-  border-radius: 10px;
+  max-width: min(100%, 460px);
+  max-height: 300px;
+  border-radius: 16px;
   object-fit: contain;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  background: #10231b;
+  box-shadow: 0 16px 44px rgba(16, 35, 27, 0.16);
 }
 
 .preview-meta {
   display: grid;
   gap: 4px;
+  max-width: 100%;
+}
+
+.preview-meta strong {
+  overflow-wrap: anywhere;
 }
 
 .preview-meta span {
-  color: #64748b;
+  color: #60756b;
   font-size: 13px;
 }
 
 .ghost-btn {
   position: relative;
   z-index: 2;
-  height: 34px;
+  min-height: 36px;
   padding: 0 14px;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
+  border: 1px solid #bfd0c7;
   background: #fff;
-  color: #334155;
-  cursor: pointer;
+  color: #33463d;
+}
+
+.ghost-btn:hover:not(:disabled) {
+  background: #f6faf8;
+  color: #087443;
+  box-shadow: none;
 }
 
 .uploader-actions {
@@ -202,27 +235,17 @@ function clearFile() {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 44px;
-  border: 0;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #166534, #15803d);
-  color: #fff;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
+  height: 46px;
   width: fit-content;
-  min-width: 160px;
+  min-width: 168px;
   padding: 0 24px;
-}
-
-.primary-btn:disabled {
-  background: #94a3b8;
-  cursor: not-allowed;
+  font-size: 15px;
+  font-weight: 800;
 }
 
 .hint {
   margin: 0;
-  color: #64748b;
+  color: #60756b;
   font-size: 13px;
 }
 
@@ -238,6 +261,12 @@ function clearFile() {
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 560px) {
+  .primary-btn {
+    width: 100%;
   }
 }
 </style>

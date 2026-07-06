@@ -2,14 +2,9 @@
   <section class="login-page">
     <form class="login-panel" @submit.prevent="submit">
       <div class="brand">
-        <svg class="brand-icon" viewBox="0 0 32 32" aria-hidden="true">
-          <path
-            d="M16 4L4 26h24L16 4zm0 6.5l6.8 13.5H9.2L16 10.5z"
-            fill="currentColor"
-          />
-        </svg>
+        <span class="brand-mark" aria-hidden="true">F</span>
         <h1>FaceShield</h1>
-        <p>AI 换脸诈骗 · 伪造人脸检测系统</p>
+        <p>AI 换脸伪造检测系统</p>
       </div>
       <label>
         <span>用户名</span>
@@ -26,7 +21,7 @@
       </label>
       <InlineError :message="authStore.error" />
       <button :disabled="authStore.loading || !username || !password">
-        {{ authStore.loading ? '登录中…' : '登录' }}
+        {{ authStore.loading ? '登录中...' : '登录' }}
       </button>
       <p class="demo-hint">演示账号：demo / demo123456</p>
       <RouterLink class="back-link" to="/">返回首页</RouterLink>
@@ -69,45 +64,55 @@ async function submit() {
 
 <style scoped>
 .brand {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
   text-align: center;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
-.brand-icon {
-  width: 40px;
-  height: 40px;
-  color: #166534;
-  margin-bottom: 8px;
+.brand-mark {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  background: #087443;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 900;
+  box-shadow: 0 14px 34px rgba(8, 116, 67, 0.22);
 }
 
 .brand h1 {
   margin: 0;
-  font-size: 28px;
-  letter-spacing: 0.04em;
+  font-size: 30px;
+  letter-spacing: -0.02em;
 }
 
 .brand p {
-  margin: 8px 0 0;
-  color:rgb(52, 59, 68);
+  margin: 0;
+  color: #60756b;
   font-size: 14px;
 }
 
 .demo-hint {
   margin: 0;
   text-align: center;
-  color:rgb(53, 59, 68);
+  color: #60756b;
   font-size: 12px;
 }
 
 .back-link {
   display: block;
   text-align: center;
-  color:rgb(64, 73, 86);
+  color: #33463d;
   font-size: 13px;
+  font-weight: 650;
   text-decoration: none;
 }
 
 .back-link:hover {
-  color: #166534;
+  color: #087443;
 }
 </style>

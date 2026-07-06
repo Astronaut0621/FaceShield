@@ -1,11 +1,18 @@
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+
+BASE_DIR = Path(__file__).resolve().parents[2]
+load_dotenv(BASE_DIR / ".env")
+load_dotenv(BASE_DIR.parent / ".env")
+
 
 class Settings:
     APP_NAME = "FaceShield"
     API_PREFIX = "/api"
-    BASE_DIR = Path(__file__).resolve().parents[2]
+    BASE_DIR = BASE_DIR
     STORAGE_DIR = BASE_DIR / "storage"
     UPLOAD_DIR = STORAGE_DIR / "uploads"
     REPORT_DIR = STORAGE_DIR / "reports"

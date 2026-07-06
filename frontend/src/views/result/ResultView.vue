@@ -81,16 +81,23 @@ watch(() => route.params.id, loadResult)
 
 <style scoped>
 .result-page {
-  max-width: 960px;
+  max-width: 1040px;
 }
 
 .secondary-btn {
-  height: 36px;
+  min-height: 38px;
   padding: 0 14px;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
+  border: 1px solid #bfd0c7;
+  border-radius: 10px;
   background: #fff;
-  color: #334155;
+  color: #33463d;
   cursor: pointer;
+  font-weight: 700;
+}
+
+.secondary-btn:hover {
+  background: #e1f4eb;
+  color: #087443;
+  box-shadow: none;
 }
 </style>

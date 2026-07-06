@@ -22,7 +22,7 @@
           alt=""
           class="thumb"
         />
-        <span v-else class="thumb-empty">—</span>
+        <span v-else class="thumb-empty">无图</span>
       </span>
       <span class="filename" :title="item.originalFilename">{{ item.originalFilename || '-' }}</span>
       <span>
@@ -62,10 +62,11 @@ function goDetail(taskId) {
 
 <style scoped>
 .history-table {
-  background: #fff;
-  border: 1px solid #dbe3ec;
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid #d8e4de;
+  border-radius: 18px;
   overflow: hidden;
+  box-shadow: 0 16px 42px rgba(16, 35, 27, 0.07);
 }
 
 .row {
@@ -74,14 +75,14 @@ function goDetail(taskId) {
   gap: 12px;
   align-items: center;
   padding: 12px 16px;
-  border-bottom: 1px solid #eef2f6;
+  border-bottom: 1px solid #e5eee9;
 }
 
 .row.head {
-  background: #f1f5f9;
+  background: #f6faf8;
   font-size: 13px;
   font-weight: 700;
-  color: #475569;
+  color: #33463d;
 }
 
 .row.body {
@@ -90,7 +91,7 @@ function goDetail(taskId) {
 }
 
 .row.body:hover {
-  background: #f8fafc;
+  background: #f6faf8;
 }
 
 .row:last-child {
@@ -101,12 +102,12 @@ function goDetail(taskId) {
   width: 48px;
   height: 48px;
   object-fit: cover;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  border: 1px solid #d8e4de;
 }
 
 .thumb-empty {
-  color: #94a3b8;
+  color: #9caeaa;
 }
 
 .filename {
@@ -124,29 +125,36 @@ function goDetail(taskId) {
 }
 
 .label-tag.real {
-  background: #dcfce7;
-  color: #15803d;
+  background: #e1f4eb;
+  color: #087443;
 }
 
 .label-tag.fake {
   background: #fee2e2;
-  color: #b91c1c;
+  color: #b42318;
 }
 
 .time {
   font-size: 13px;
-  color: #64748b;
+  color: #60756b;
 }
 
 .link-btn {
   height: 30px;
   padding: 0 10px;
   border: 0;
-  border-radius: 6px;
-  background: #eef2ff;
-  color: #4338ca;
+  border-radius: 9px;
+  background: #e1f4eb;
+  color: #065f36;
   cursor: pointer;
   font-size: 13px;
+  font-weight: 700;
+}
+
+.link-btn:hover {
+  background: #087443;
+  color: #fff;
+  box-shadow: none;
 }
 
 @media (max-width: 960px) {

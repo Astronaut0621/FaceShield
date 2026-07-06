@@ -106,28 +106,33 @@ onMounted(load)
 
 <style scoped>
 .history-page {
-  max-width: 1100px;
+  max-width: 1120px;
 }
 
 .filters {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid #d8e4de;
+  border-radius: 16px;
 }
 
 .filters label {
   display: grid;
   gap: 6px;
   font-size: 13px;
-  color: #475569;
+  color: #33463d;
+  font-weight: 700;
 }
 
 .filters select {
   height: 36px;
   min-width: 140px;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
+  border: 1px solid #bfd0c7;
+  border-radius: 10px;
   padding: 0 10px;
   background: #fff;
   font: inherit;

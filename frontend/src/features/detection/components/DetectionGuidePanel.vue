@@ -17,7 +17,7 @@
       <h3>融合分析</h3>
       <div class="tech-cards">
         <article v-for="item in techItems" :key="item.title" class="tech-card">
-          <span class="tech-icon">{{ item.icon }}</span>
+          <span class="tech-icon">{{ item.code }}</span>
           <div>
             <strong>{{ item.title }}</strong>
             <p>{{ item.desc }}</p>
@@ -46,29 +46,30 @@ const steps = [
 ]
 
 const techItems = [
-  { icon: '🌊', title: '频域分支', desc: 'FFT 幅度谱捕捉高频伪影与压缩残留' },
-  { icon: '🎯', title: '空域分支', desc: 'CNN 纹理分析，识别换脸边界痕迹' },
-  { icon: '🔥', title: '热力图', desc: 'Grad-CAM 高亮模型关注区域' }
+  { code: 'FFT', title: '频域分支', desc: '幅度谱捕捉高频伪影与压缩残留' },
+  { code: 'CNN', title: '空域分支', desc: '纹理分析识别换脸边界痕迹' },
+  { code: 'CAM', title: '热力图', desc: 'Grad-CAM 高亮模型关注区域' }
 ]
 </script>
 
 <style scoped>
 .guide-panel {
   display: grid;
-  gap: 16px;
+  gap: 14px;
 }
 
 .guide-block {
-  background: #fff;
-  border: 1px solid #dbe3ec;
-  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid #d8e4de;
+  border-radius: 18px;
   padding: 20px;
+  box-shadow: 0 14px 34px rgba(16, 35, 27, 0.05);
 }
 
 .guide-block h3 {
   margin: 0 0 16px;
   font-size: 15px;
-  color: #0f172a;
+  color: #10231b;
 }
 
 .steps {
@@ -87,28 +88,28 @@ const techItems = [
 
 .step-num {
   flex-shrink: 0;
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   display: grid;
   place-items: center;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #166534, #15803d);
-  color: #fff;
+  border-radius: 11px;
+  background: #e1f4eb;
+  color: #065f36;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 900;
 }
 
 .steps strong {
   display: block;
   font-size: 14px;
-  color: #1e293b;
+  color: #10231b;
   margin-bottom: 2px;
 }
 
 .steps p {
   margin: 0;
   font-size: 13px;
-  color: #64748b;
+  color: #60756b;
   line-height: 1.5;
 }
 
@@ -121,35 +122,43 @@ const techItems = [
   display: flex;
   gap: 12px;
   padding: 12px;
-  border-radius: 10px;
-  background: #f8fafc;
-  border: 1px solid #eef2f6;
+  border-radius: 14px;
+  background: #f6faf8;
+  border: 1px solid #e5eee9;
 }
 
 .tech-icon {
-  font-size: 22px;
+  width: 42px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: #10231b;
+  color: #5eeaa2;
+  font-size: 11px;
+  font-weight: 900;
   flex-shrink: 0;
 }
 
 .tech-card strong {
   display: block;
   font-size: 13px;
-  color: #1e293b;
+  color: #10231b;
   margin-bottom: 2px;
 }
 
 .tech-card p {
   margin: 0;
   font-size: 12px;
-  color: #64748b;
+  color: #60756b;
   line-height: 1.5;
 }
 
 .tips ul {
   margin: 0;
   padding-left: 18px;
-  color: #64748b;
+  color: #60756b;
   font-size: 13px;
-  line-height: 1.8;
+  line-height: 1.85;
 }
 </style>

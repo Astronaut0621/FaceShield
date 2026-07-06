@@ -1,16 +1,11 @@
 <template>
   <header class="home-nav">
     <RouterLink class="brand" to="/">
-      <svg class="brand-icon" viewBox="0 0 32 32" aria-hidden="true">
-        <path
-          d="M16 4L4 26h24L16 4zm0 6.5l6.8 13.5H9.2L16 10.5z"
-          fill="currentColor"
-        />
-      </svg>
+      <span class="brand-mark" aria-hidden="true">F</span>
       <span>FaceShield</span>
     </RouterLink>
 
-    <nav class="nav-links">
+    <nav class="nav-links" aria-label="首页导航">
       <RouterLink to="/">首页</RouterLink>
       <RouterLink to="/detective">图片检测</RouterLink>
       <RouterLink to="/history">历史记录</RouterLink>
@@ -19,20 +14,17 @@
   </header>
 </template>
 
-<script setup>
-import { authStore } from '@/stores/auth.store'
-</script>
-
 <style scoped>
 .home-nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  padding: 14px 28px;
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+  min-height: 68px;
+  padding: 14px 24px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid rgba(216, 228, 222, 0.76);
 }
 
 .brand {
@@ -40,57 +32,56 @@ import { authStore } from '@/stores/auth.store'
   align-items: center;
   gap: 10px;
   text-decoration: none;
-  color: #166534;
+  color: #10231b;
   font-size: 18px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
+  font-weight: 800;
 }
 
-.brand-icon {
-  width: 28px;
-  height: 28px;
+.brand-mark {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: #087443;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 900;
 }
 
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 28px;
+  gap: 8px;
 }
 
 .nav-links a {
-  color: #334155;
+  display: inline-flex;
+  align-items: center;
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 10px;
+  color: #33463d;
   text-decoration: none;
   font-size: 14px;
-  font-weight: 500;
-  transition: color 0.15s;
+  font-weight: 650;
+  transition:
+    background 0.16s ease,
+    color 0.16s ease;
 }
 
 .nav-links a:hover,
 .nav-links a.router-link-active {
-  color: #166534;
+  background: #e1f4eb;
+  color: #065f36;
 }
 
-.login-btn {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 40px;
-  padding: 0 22px;
-  border-radius: 8px;
-  background: #166534;
-  color: #fff;
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 600;
-  transition: background 0.15s;
-}
+@media (max-width: 760px) {
+  .home-nav {
+    min-height: 62px;
+    padding: 12px 14px;
+  }
 
-.login-btn:hover {
-  background: #15803d;
-}
-
-@media (max-width: 768px) {
   .nav-links {
     display: none;
   }

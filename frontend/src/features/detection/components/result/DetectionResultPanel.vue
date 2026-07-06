@@ -86,10 +86,11 @@ defineProps({
 .result-panel {
   display: grid;
   gap: 24px;
-  background: #fff;
-  border: 1px solid #dbe3ec;
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid #d8e4de;
+  border-radius: 20px;
   padding: 24px;
+  box-shadow: 0 16px 42px rgba(16, 35, 27, 0.07);
 }
 
 .result-header {
@@ -102,8 +103,9 @@ defineProps({
 
 .result-kicker {
   margin: 0 0 4px;
-  color: #64748b;
+  color: #60756b;
   font-size: 13px;
+  font-weight: 750;
 }
 
 .verdict {
@@ -112,11 +114,11 @@ defineProps({
 }
 
 .verdict.real {
-  color: #15803d;
+  color: #087443;
 }
 
 .verdict.fake {
-  color: #b91c1c;
+  color: #b42318;
 }
 
 .result-meta {
@@ -124,8 +126,9 @@ defineProps({
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 16px;
   padding: 16px;
-  background: #f8fafc;
-  border-radius: 10px;
+  background: #f6faf8;
+  border: 1px solid #e5eee9;
+  border-radius: 16px;
 }
 
 .meta-item {
@@ -134,8 +137,12 @@ defineProps({
 }
 
 .meta-item span {
-  color: #64748b;
+  color: #60756b;
   font-size: 13px;
+}
+
+.meta-item strong {
+  color: #10231b;
 }
 
 .score-grid {
@@ -146,10 +153,10 @@ defineProps({
 .suggestion {
   margin: 0;
   padding: 14px 16px;
-  border-left: 4px solid #6366f1;
-  background: #eef2ff;
-  color: #3730a3;
-  border-radius: 0 8px 8px 0;
+  border-left: 4px solid #087443;
+  background: #e1f4eb;
+  color: #065f36;
+  border-radius: 0 12px 12px 0;
   line-height: 1.6;
 }
 
@@ -168,26 +175,26 @@ defineProps({
 .image-card figcaption {
   font-size: 14px;
   font-weight: 600;
-  color: #334155;
+  color: #33463d;
 }
 
 .image-card img {
   width: 100%;
   max-height: 280px;
   object-fit: contain;
-  border-radius: 10px;
-  background: #0f172a;
-  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #10231b;
+  border: 1px solid #d8e4de;
 }
 
 .image-empty {
   display: grid;
   place-items: center;
   min-height: 180px;
-  border: 1px dashed #cbd5e1;
-  border-radius: 10px;
-  background: #f8fafc;
-  color: #64748b;
+  border: 1px dashed #bfd0c7;
+  border-radius: 16px;
+  background: #f6faf8;
+  color: #60756b;
   font-size: 14px;
   text-align: center;
   padding: 16px;
