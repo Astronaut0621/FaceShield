@@ -33,6 +33,26 @@ def compute_fft_tensor(image: Image.Image) -> np.ndarray:
     spectrum = np.fft.fft2(gray)
     spectrum = np.fft.fftshift(spectrum)
     magnitude = np.log1p(np.abs(spectrum)).astype("float32")
+    return normalize_frequency_map(magnitude)
+
+
+def compute_highfreq_fft_tensor(image: Image.Image, low_radius_ratio: float = 0.18) -> np.ndarray:
+    gray = np.asarray(image.convert("L"), dtype="float32") / 255.0
+    spectrum = np.fft.fft2(gray)
+    spectrum = np.fft.fftshift(spectrum)
+    magnitude = np.log1p(np.abs(spectrum)).astype("float32")
+    height, width = magnitude.shape
+    yy, xx = np.ogrid[:height, :width]
+    cy = (height - 1) / 2.0
+    cx = (width - 1) / 2.0
+    radius = np.sqrt((yy - cy) ** 2 + (xx - cx) ** 2)
+    max_radius = float(radius.max())
+    cutoff = max_radius * low_radius_ratio
+    highfreq = magnitude * (radius >= cutoff).astype("float32")
+    return normalize_frequency_map(highfreq)
+
+
+def normalize_frequency_map(magnitude: np.ndarray) -> np.ndarray:
     min_value = float(magnitude.min())
     max_value = float(magnitude.max())
     if max_value > min_value:
@@ -40,6 +60,14 @@ def compute_fft_tensor(image: Image.Image) -> np.ndarray:
     else:
         magnitude = np.zeros_like(magnitude, dtype="float32")
     return magnitude[np.newaxis, :, :].astype("float32")
+
+
+def compute_frequency_tensor(image: Image.Image, mode: str) -> np.ndarray:
+    if mode == "fusion_fft":
+        return compute_fft_tensor(image)
+    if mode == "fusion_v2":
+        return compute_highfreq_fft_tensor(image)
+    raise ValueError(f"Unsupported frequency mode: {mode}")
 
 
 def random_color_jitter(image: Image.Image) -> Image.Image:
@@ -62,7 +90,7 @@ class FaceForgeryDataset(paddle.io.Dataset):
         augment: bool = False,
     ) -> None:
         super().__init__()
-        if mode not in {"rgb", "fusion_fft"}:
+        if mode not in {"rgb", "fusion_fft", "fusion_v2"}:
             raise ValueError(f"Unsupported dataset mode: {mode}")
         self.rows = rows
         self.data_root = Path(data_root)
@@ -87,7 +115,7 @@ class FaceForgeryDataset(paddle.io.Dataset):
 
         rgb = pil_to_rgb_tensor(image).astype("float32")
         label = np.array(int(row["label"]), dtype="int64")
-        if self.mode == "fusion_fft":
-            fft = compute_fft_tensor(image)
-            return rgb, fft, label
+        if self.mode in {"fusion_fft", "fusion_v2"}:
+            frequency = compute_frequency_tensor(image, self.mode)
+            return rgb, frequency, label
         return rgb, label

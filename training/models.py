@@ -5,6 +5,13 @@ from paddle import nn
 import paddle.nn.functional as F
 
 
+FUSION_MODELS = {"fusion_fft", "fusion_v2"}
+
+
+def is_fusion_model(model_name: str) -> bool:
+    return model_name in FUSION_MODELS
+
+
 class ConvBNReLU(nn.Layer):
     def __init__(self, in_channels: int, out_channels: int, stride: int = 1) -> None:
         super().__init__()
@@ -78,9 +85,43 @@ class FusionFFTNet(nn.Layer):
         return self.classifier(fused)
 
 
+class FusionGatedFFTNet(nn.Layer):
+    def __init__(self, num_classes: int = 2, feature_dim: int = 128, dropout: float = 0.3) -> None:
+        super().__init__()
+        self.spatial_branch = TinyBackbone(in_channels=3, feature_dim=feature_dim)
+        self.frequency_branch = TinyBackbone(in_channels=1, feature_dim=feature_dim)
+        self.gate = nn.Sequential(
+            nn.Linear(feature_dim * 2, feature_dim),
+            nn.ReLU(),
+            nn.Linear(feature_dim, feature_dim),
+            nn.Sigmoid(),
+        )
+        self.frequency_scale = self.create_parameter(
+            shape=[1],
+            dtype="float32",
+            default_initializer=nn.initializer.Constant(0.1),
+        )
+        self.classifier = nn.Sequential(
+            nn.Dropout(dropout),
+            nn.Linear(feature_dim, feature_dim),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.Linear(feature_dim, num_classes),
+        )
+
+    def forward(self, rgb: paddle.Tensor, frequency: paddle.Tensor) -> paddle.Tensor:
+        spatial = self.spatial_branch(rgb)
+        frequency_feature = self.frequency_branch(frequency)
+        gate = self.gate(paddle.concat([spatial, frequency_feature], axis=1))
+        fused = spatial + self.frequency_scale * gate * frequency_feature
+        return self.classifier(fused)
+
+
 def build_model(model_name: str, dropout: float = 0.3, feature_dim: int = 128) -> nn.Layer:
     if model_name == "baseline":
         return BaselineCNN(dropout=dropout, feature_dim=feature_dim)
     if model_name == "fusion_fft":
         return FusionFFTNet(dropout=dropout, feature_dim=feature_dim)
+    if model_name == "fusion_v2":
+        return FusionGatedFFTNet(dropout=dropout, feature_dim=feature_dim)
     raise ValueError(f"Unsupported model: {model_name}")

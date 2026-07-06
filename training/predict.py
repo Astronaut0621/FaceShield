@@ -8,8 +8,8 @@ from PIL import Image
 import paddle
 import paddle.nn.functional as F
 
-from dataset import compute_fft_tensor, pil_to_rgb_tensor
-from models import build_model
+from dataset import compute_frequency_tensor, pil_to_rgb_tensor
+from models import build_model, is_fusion_model
 
 
 def parse_args() -> argparse.Namespace:
@@ -17,7 +17,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--image", type=Path, required=True)
     parser.add_argument("--checkpoint", type=Path, required=True)
     parser.add_argument("--config", type=Path, default=None)
-    parser.add_argument("--model", choices=["baseline", "fusion_fft"], default=None)
+    parser.add_argument("--model", choices=["baseline", "fusion_fft", "fusion_v2"], default=None)
     parser.add_argument("--image-size", type=int, default=None)
     parser.add_argument("--dropout", type=float, default=None)
     parser.add_argument("--feature-dim", type=int, default=None)
@@ -58,9 +58,9 @@ def main() -> int:
         image = image.resize((image_size, image_size), Image.BILINEAR)
     rgb = paddle.to_tensor(pil_to_rgb_tensor(image)).unsqueeze(0)
     with paddle.no_grad():
-        if model_name == "fusion_fft":
-            fft = paddle.to_tensor(compute_fft_tensor(image)).unsqueeze(0)
-            logits = model(rgb, fft)
+        if is_fusion_model(model_name):
+            frequency = paddle.to_tensor(compute_frequency_tensor(image, model_name)).unsqueeze(0)
+            logits = model(rgb, frequency)
         else:
             logits = model(rgb)
         prob = F.softmax(logits, axis=1).numpy()[0]

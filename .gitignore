@@ -20,8 +20,10 @@ frontend/dist/
 data/
 AutoDL/
 FaceForensics-master/
-faceshield_outputs/
 outputs/
+model/outputs/
+model/summary/
+model/*.tar.gz
 
 # Archives and model checkpoints
 *.zip
@@ -37,6 +39,7 @@ outputs/
 *.pt
 *.ckpt
 *.onnx
+!model/deploy/**/*.pdparams
 
 # Local report/template binaries and Office lock files
 docs/*.doc

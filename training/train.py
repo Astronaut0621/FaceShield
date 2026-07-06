@@ -15,14 +15,14 @@ from tqdm import tqdm
 
 from dataset import FaceForgeryDataset, read_manifest, split_rows
 from metrics import classification_metrics
-from models import build_model
+from models import build_model, is_fusion_model
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Train FaceShield face forgery detector.")
     parser.add_argument("--data-root", type=Path, default=Path("data/ffpp_faces"))
     parser.add_argument("--manifest", default="face_manifest_clean.csv")
-    parser.add_argument("--model", choices=["baseline", "fusion_fft"], default="fusion_fft")
+    parser.add_argument("--model", choices=["baseline", "fusion_fft", "fusion_v2"], default="fusion_fft")
     parser.add_argument("--output-dir", type=Path, default=Path("outputs/fusion_fft"))
     parser.add_argument("--device", choices=["gpu", "cpu"], default="gpu")
     parser.add_argument("--image-size", type=int, default=224)
@@ -36,6 +36,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--patience", type=int, default=8)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--no-augment", action="store_true")
+    parser.add_argument(
+        "--spatial-checkpoint",
+        type=Path,
+        default=None,
+        help="Optional baseline checkpoint used to initialize the spatial branch of fusion models.",
+    )
+    parser.add_argument(
+        "--freeze-spatial-epochs",
+        type=int,
+        default=0,
+        help="Freeze the initialized spatial branch for the first N epochs of fusion training.",
+    )
     return parser.parse_args()
 
 
@@ -59,7 +71,7 @@ def make_loader(
         rows=rows,
         data_root=data_root,
         image_size=image_size,
-        mode="fusion_fft" if model_name == "fusion_fft" else "rgb",
+        mode=model_name if is_fusion_model(model_name) else "rgb",
         augment=augment,
     )
     return DataLoader(
@@ -73,9 +85,9 @@ def make_loader(
 
 
 def forward_model(model: paddle.nn.Layer, model_name: str, batch):
-    if model_name == "fusion_fft":
-        rgb, fft, labels = batch
-        logits = model(rgb, fft)
+    if is_fusion_model(model_name):
+        rgb, frequency, labels = batch
+        logits = model(rgb, frequency)
     else:
         rgb, labels = batch
         logits = model(rgb)
@@ -88,10 +100,13 @@ def run_epoch(
     model_name: str,
     optimizer: Optional[paddle.optimizer.Optimizer],
     desc: str,
+    freeze_spatial_branch: bool = False,
 ) -> dict[str, float]:
     is_train = optimizer is not None
     if is_train:
         model.train()
+        if freeze_spatial_branch and hasattr(model, "spatial_branch"):
+            model.spatial_branch.eval()
     else:
         model.eval()
 
@@ -127,8 +142,40 @@ def save_json(path: Path, data) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+def load_spatial_branch_from_baseline(model: paddle.nn.Layer, checkpoint_path: Path) -> int:
+    if not hasattr(model, "spatial_branch"):
+        raise ValueError("Spatial checkpoint can only be loaded into a fusion model.")
+    if not checkpoint_path.exists():
+        raise FileNotFoundError(f"Spatial checkpoint not found: {checkpoint_path}")
+
+    baseline_state = paddle.load(str(checkpoint_path))
+    model_state = model.state_dict()
+    loaded = 0
+    for key, value in baseline_state.items():
+        if not key.startswith("backbone."):
+            continue
+        target_key = f"spatial_branch.{key[len('backbone.'):]}"
+        if target_key in model_state and tuple(model_state[target_key].shape) == tuple(value.shape):
+            model_state[target_key] = value
+            loaded += 1
+    model.set_state_dict(model_state)
+    return loaded
+
+
+def set_spatial_branch_trainable(model: paddle.nn.Layer, trainable: bool) -> None:
+    if not hasattr(model, "spatial_branch"):
+        return
+    for parameter in model.spatial_branch.parameters():
+        parameter.stop_gradient = not trainable
+
+
 def main() -> int:
     args = parse_args()
+    if args.spatial_checkpoint and not is_fusion_model(args.model):
+        raise SystemExit("--spatial-checkpoint is only supported for fusion models.")
+    if args.freeze_spatial_epochs > 0 and not args.spatial_checkpoint:
+        raise SystemExit("--freeze-spatial-epochs requires --spatial-checkpoint.")
+
     set_seed(args.seed)
     if args.device == "gpu" and paddle.device.is_compiled_with_cuda():
         paddle.set_device("gpu")
@@ -147,6 +194,7 @@ def main() -> int:
     config = vars(args).copy()
     config["data_root"] = str(args.data_root)
     config["output_dir"] = str(args.output_dir)
+    config["spatial_checkpoint"] = str(args.spatial_checkpoint) if args.spatial_checkpoint else None
     config["manifest_path"] = str(manifest_path)
     config["paddle_version"] = paddle.__version__
     config["device_used"] = paddle.device.get_device()
@@ -189,6 +237,15 @@ def main() -> int:
     )
 
     model = build_model(args.model, dropout=args.dropout, feature_dim=args.feature_dim)
+    if args.spatial_checkpoint:
+        loaded = load_spatial_branch_from_baseline(model, args.spatial_checkpoint)
+        print(f"loaded {loaded} tensors into spatial_branch from {args.spatial_checkpoint}")
+        if loaded == 0:
+            raise SystemExit("No spatial branch tensors were loaded; check checkpoint compatibility.")
+    if args.freeze_spatial_epochs > 0:
+        set_spatial_branch_trainable(model, False)
+        print(f"spatial_branch frozen for first {args.freeze_spatial_epochs} epochs")
+
     optimizer = paddle.optimizer.AdamW(
         learning_rate=args.lr,
         parameters=model.parameters(),
@@ -201,7 +258,18 @@ def main() -> int:
     history = []
     started_at = time.time()
     for epoch in range(1, args.epochs + 1):
-        train_metrics = run_epoch(model, train_loader, args.model, optimizer, f"epoch {epoch} train")
+        if args.freeze_spatial_epochs > 0 and epoch == args.freeze_spatial_epochs + 1:
+            set_spatial_branch_trainable(model, True)
+            print("spatial_branch unfrozen")
+        spatial_frozen = args.freeze_spatial_epochs > 0 and epoch <= args.freeze_spatial_epochs
+        train_metrics = run_epoch(
+            model,
+            train_loader,
+            args.model,
+            optimizer,
+            f"epoch {epoch} train",
+            freeze_spatial_branch=spatial_frozen,
+        )
         val_metrics = run_epoch(model, val_loader, args.model, None, f"epoch {epoch} val")
         record = {
             "epoch": epoch,
