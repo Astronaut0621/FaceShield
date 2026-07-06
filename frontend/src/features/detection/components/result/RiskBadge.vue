@@ -26,8 +26,8 @@ defineProps({
 }
 
 .risk-badge.risk-low {
-  background: #dcfce7;
-  color: #15803d;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
 }
 
 .risk-badge.risk-medium {

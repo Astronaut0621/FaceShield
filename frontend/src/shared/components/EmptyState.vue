@@ -22,7 +22,7 @@ defineProps({
   gap: 12px;
   place-items: center;
   padding: 40px 20px;
-  color: #64748b;
+  color: var(--muted);
   text-align: center;
 }
 
@@ -34,8 +34,8 @@ defineProps({
   height: 36px;
   padding: 0 16px;
   border: 0;
-  border-radius: 6px;
-  background: #166534;
+  border-radius: 10px;
+  background: var(--accent);
   color: #fff;
   cursor: pointer;
 }

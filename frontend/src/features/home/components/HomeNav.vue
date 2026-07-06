@@ -24,7 +24,7 @@
   padding: 14px 24px;
   background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(18px);
-  border-bottom: 1px solid rgba(216, 228, 222, 0.76);
+  border-bottom: 1px solid rgba(216, 224, 236, 0.76);
 }
 
 .brand {
@@ -32,7 +32,7 @@
   align-items: center;
   gap: 10px;
   text-decoration: none;
-  color: #10231b;
+  color: var(--text);
   font-size: 18px;
   font-weight: 800;
 }
@@ -43,7 +43,7 @@
   display: grid;
   place-items: center;
   border-radius: 11px;
-  background: #087443;
+  background: var(--accent);
   color: #fff;
   font-size: 16px;
   font-weight: 900;
@@ -61,7 +61,7 @@
   height: 38px;
   padding: 0 12px;
   border-radius: 10px;
-  color: #33463d;
+  color: var(--muted-strong);
   text-decoration: none;
   font-size: 14px;
   font-weight: 650;
@@ -72,8 +72,8 @@
 
 .nav-links a:hover,
 .nav-links a.router-link-active {
-  background: #e1f4eb;
-  color: #065f36;
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 @media (max-width: 760px) {

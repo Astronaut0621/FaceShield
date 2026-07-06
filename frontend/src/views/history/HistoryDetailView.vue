@@ -7,7 +7,7 @@
       </template>
     </PageHeader>
 
-    <LoadingState :active="loading" message="加载记录详情…" />
+    <LoadingState :active="loading" message="加载记录详情..." />
     <InlineError :message="error" />
     <DetectionResultPanel v-if="result && !loading" :result="result" />
   </section>
@@ -60,10 +60,17 @@ watch(() => route.params.id, loadDetail)
 .secondary-btn {
   height: 36px;
   padding: 0 14px;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  background: #fff;
-  color: #334155;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--muted-strong);
   cursor: pointer;
+  font-weight: 700;
+}
+
+.secondary-btn:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+  box-shadow: none;
 }
 </style>

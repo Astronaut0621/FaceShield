@@ -10,7 +10,7 @@ defineProps({
   active: Boolean,
   message: {
     type: String,
-    default: '加载中…'
+    default: '加载中...'
   }
 })
 </script>
@@ -21,15 +21,15 @@ defineProps({
   align-items: center;
   gap: 10px;
   margin-bottom: 16px;
-  color: #475569;
+  color: var(--muted);
   font-size: 14px;
 }
 
 .spinner {
   width: 16px;
   height: 16px;
-  border: 2px solid rgba(71, 85, 105, 0.25);
-  border-top-color: #475569;
+  border: 2px solid rgba(37, 99, 235, 0.22);
+  border-top-color: var(--accent);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }

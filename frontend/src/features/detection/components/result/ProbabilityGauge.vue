@@ -62,13 +62,13 @@ svg {
 
 .gauge-track {
   fill: none;
-  stroke: #e2e8f0;
+  stroke: var(--line);
   stroke-width: 10;
 }
 
 .gauge-fill {
   fill: none;
-  stroke: #16a34a;
+  stroke: var(--accent);
   stroke-width: 10;
   stroke-linecap: round;
   transition: stroke-dashoffset 0.6s ease;
@@ -96,7 +96,7 @@ svg {
 }
 
 .gauge-center span {
-  color: #64748b;
+  color: var(--muted);
   font-size: 12px;
   margin-top: 4px;
 }

@@ -31,9 +31,9 @@
   margin: 0 auto;
   padding: 8px;
   background: rgba(255, 255, 255, 0.94);
-  border: 1px solid rgba(216, 228, 222, 0.92);
+  border: 1px solid rgba(216, 224, 236, 0.92);
   border-radius: 18px;
-  box-shadow: 0 18px 55px rgba(16, 35, 27, 0.14);
+  box-shadow: 0 18px 55px rgba(23, 32, 51, 0.12);
 }
 
 .detect-field {
@@ -46,13 +46,13 @@
 .field-label {
   font-size: 12px;
   font-weight: 750;
-  color: #60756b;
+  color: var(--muted);
 }
 
 .field-value {
   font-size: 14px;
   font-weight: 750;
-  color: #10231b;
+  color: var(--text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -63,7 +63,7 @@
   height: 48px;
   align-self: center;
   margin-left: -1px;
-  background: #d8e4de;
+  background: var(--line);
 }
 
 @media (max-width: 860px) {

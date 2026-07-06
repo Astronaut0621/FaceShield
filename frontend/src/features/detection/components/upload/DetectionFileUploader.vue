@@ -1,5 +1,5 @@
 <template>
-  <section class="uploader">
+  <section class="uploader" :class="{ large }">
     <div
       class="drop-zone"
       :class="{ active: dragging, disabled: loading, 'has-file': previewUrl }"
@@ -46,7 +46,8 @@ import { computed, ref, watch } from 'vue'
 
 const props = defineProps({
   modelValue: File,
-  loading: Boolean
+  loading: Boolean,
+  large: Boolean
 })
 
 const emit = defineEmits(['update:modelValue', 'submit'])
@@ -115,11 +116,11 @@ function clearFile() {
   min-height: 330px;
   display: grid;
   place-items: center;
-  border: 1.5px dashed #9fb8ad;
+  border: 1.5px dashed var(--line-strong);
   border-radius: 18px;
   background:
-    linear-gradient(180deg, rgba(246, 250, 248, 0.9), rgba(255, 255, 255, 0.96)),
-    #fff;
+    linear-gradient(180deg, rgba(247, 249, 252, 0.9), rgba(255, 255, 255, 0.96)),
+    var(--surface);
   transition:
     border-color 0.2s ease,
     background 0.2s ease,
@@ -128,15 +129,15 @@ function clearFile() {
 }
 
 .drop-zone.active {
-  border-color: #087443;
-  background: #e1f4eb;
-  box-shadow: 0 0 0 5px rgba(8, 116, 67, 0.1);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.1);
   transform: translateY(-1px);
 }
 
 .drop-zone.has-file {
   border-style: solid;
-  background: #f6faf8;
+  background: var(--surface-soft);
 }
 
 .drop-zone.disabled {
@@ -167,8 +168,8 @@ function clearFile() {
   display: grid;
   place-items: center;
   border-radius: 18px;
-  background: #e1f4eb;
-  color: #065f36;
+  background: var(--accent-soft);
+  color: var(--accent);
   font-size: 13px;
   font-weight: 900;
 }
@@ -177,11 +178,11 @@ function clearFile() {
   margin: 8px 0 0;
   font-size: 17px;
   font-weight: 800;
-  color: #10231b;
+  color: var(--text);
 }
 
 .drop-content span {
-  color: #60756b;
+  color: var(--muted);
   font-size: 13px;
 }
 
@@ -190,8 +191,8 @@ function clearFile() {
   max-height: 300px;
   border-radius: 16px;
   object-fit: contain;
-  background: #10231b;
-  box-shadow: 0 16px 44px rgba(16, 35, 27, 0.16);
+  background: var(--text);
+  box-shadow: 0 16px 44px rgba(23, 32, 51, 0.14);
 }
 
 .preview-meta {
@@ -205,7 +206,7 @@ function clearFile() {
 }
 
 .preview-meta span {
-  color: #60756b;
+  color: var(--muted);
   font-size: 13px;
 }
 
@@ -214,20 +215,50 @@ function clearFile() {
   z-index: 2;
   min-height: 36px;
   padding: 0 14px;
-  border: 1px solid #bfd0c7;
-  background: #fff;
-  color: #33463d;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--muted-strong);
 }
 
 .ghost-btn:hover:not(:disabled) {
-  background: #f6faf8;
-  color: #087443;
+  background: var(--accent-soft);
+  color: var(--accent);
   box-shadow: none;
 }
 
 .uploader-actions {
   display: grid;
   gap: 8px;
+  justify-items: center;
+  text-align: center;
+}
+
+.uploader.large .drop-zone {
+  min-height: 380px;
+}
+
+.uploader.large .drop-content {
+  padding: 48px 32px;
+}
+
+.uploader.large .drop-icon {
+  font-size: 48px;
+}
+
+.uploader.large .drop-content p {
+  font-size: 18px;
+}
+
+.uploader.large .preview {
+  max-width: min(100%, 560px);
+  max-height: 360px;
+}
+
+.uploader.large .primary-btn {
+  width: 100%;
+  max-width: 320px;
+  height: 50px;
+  font-size: 16px;
 }
 
 .primary-btn {
@@ -245,7 +276,7 @@ function clearFile() {
 
 .hint {
   margin: 0;
-  color: #60756b;
+  color: var(--muted);
   font-size: 13px;
 }
 

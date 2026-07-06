@@ -39,7 +39,7 @@
   align-items: center;
   gap: clamp(28px, 6vw, 74px);
   padding: clamp(40px, 7vw, 82px) clamp(22px, 6vw, 74px) 150px;
-  color: #10231b;
+  color: var(--text);
 }
 
 .hero-copy {
@@ -51,8 +51,8 @@
   margin: 0 0 16px;
   padding: 7px 11px;
   border-radius: 999px;
-  background: #e1f4eb;
-  color: #065f36;
+  background: var(--accent-soft);
+  color: var(--accent);
   font-size: 13px;
   font-weight: 750;
 }
@@ -68,7 +68,7 @@
 .hero-desc {
   margin: 22px 0 30px;
   max-width: 520px;
-  color: #4b6258;
+  color: var(--muted);
   font-size: clamp(16px, 2vw, 19px);
   line-height: 1.7;
 }
@@ -97,24 +97,24 @@
 }
 
 .hero-cta {
-  background: #087443;
+  background: var(--accent);
   color: #fff;
-  box-shadow: 0 14px 34px rgba(8, 116, 67, 0.24);
+  box-shadow: 0 14px 34px rgba(37, 99, 235, 0.24);
 }
 
 .hero-link {
-  background: #fff;
-  color: #10231b;
-  border: 1px solid #d8e4de;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--line);
 }
 
 .hero-cta:hover {
-  background: #065f36;
+  background: var(--accent-strong);
   transform: translateY(-1px);
 }
 
 .hero-link:hover {
-  background: #f6faf8;
+  background: var(--surface-soft);
   transform: translateY(-1px);
 }
 
@@ -128,9 +128,9 @@
   inset: 28px 0 0 52px;
   overflow: hidden;
   border-radius: 24px;
-  border: 1px solid rgba(16, 35, 27, 0.14);
-  background: #10231b;
-  box-shadow: 0 28px 70px rgba(16, 35, 27, 0.22);
+  border: 1px solid rgba(23, 32, 51, 0.14);
+  background: var(--text);
+  box-shadow: 0 28px 70px rgba(23, 32, 51, 0.2);
 }
 
 .face-frame img {
@@ -147,7 +147,7 @@
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, transparent 0%, rgba(16, 35, 27, 0.52) 100%),
+    linear-gradient(180deg, transparent 0%, rgba(23, 32, 51, 0.52) 100%),
     repeating-linear-gradient(
       0deg,
       rgba(255, 255, 255, 0.08) 0,
@@ -160,9 +160,9 @@
 .focus-box {
   position: absolute;
   z-index: 2;
-  border: 2px solid #5eeaa2;
+  border: 2px solid var(--accent-glow);
   border-radius: 16px;
-  box-shadow: 0 0 0 5px rgba(94, 234, 162, 0.12);
+  box-shadow: 0 0 0 5px rgba(147, 197, 253, 0.16);
 }
 
 .focus-one {
@@ -187,8 +187,8 @@
   padding: 17px;
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(216, 228, 222, 0.9);
-  box-shadow: 0 18px 46px rgba(16, 35, 27, 0.16);
+  border: 1px solid rgba(216, 224, 236, 0.9);
+  box-shadow: 0 18px 46px rgba(23, 32, 51, 0.14);
 }
 
 .main-card {
@@ -204,20 +204,20 @@
 }
 
 .scan-label {
-  color: #60756b;
+  color: var(--muted);
   font-size: 12px;
   font-weight: 750;
 }
 
 .scan-card strong {
-  color: #10231b;
+  color: var(--text);
   font-size: 26px;
   line-height: 1;
 }
 
 .scan-card p {
   margin: 0;
-  color: #60756b;
+  color: var(--muted);
   font-size: 13px;
   line-height: 1.55;
 }

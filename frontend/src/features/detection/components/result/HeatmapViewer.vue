@@ -25,9 +25,9 @@
     </div>
 
     <div v-else class="heatmap-placeholder">
-      <div class="placeholder-icon">🔍</div>
+      <div class="placeholder-icon">CAM</div>
       <p>暂无可疑区域热力图</p>
-      <span>模型联调后将展示 Grad-CAM 可视化结果</span>
+      <span>模型联调后将展示热力图可视化结果</span>
     </div>
   </section>
 </template>
@@ -81,8 +81,8 @@ function onHeatmapError() {
 
 .section-label {
   font-size: 14px;
-  font-weight: 600;
-  color: #334155;
+  font-weight: 700;
+  color: var(--muted-strong);
 }
 
 .overlay-toggle {
@@ -90,7 +90,7 @@ function onHeatmapError() {
   align-items: center;
   gap: 6px;
   font-size: 13px;
-  color: #475569;
+  color: var(--muted);
   cursor: pointer;
 }
 
@@ -98,7 +98,7 @@ function onHeatmapError() {
   position: relative;
   border-radius: 10px;
   overflow: hidden;
-  background: #0f172a;
+  background: var(--text);
   min-height: 260px;
   display: grid;
   place-items: center;
@@ -123,25 +123,33 @@ function onHeatmapError() {
   place-items: center;
   gap: 8px;
   min-height: 220px;
-  border: 1px dashed #cbd5e1;
+  border: 1px dashed var(--line-strong);
   border-radius: 10px;
-  background: #f8fafc;
+  background: var(--surface-soft);
   text-align: center;
   padding: 24px;
 }
 
 .placeholder-icon {
-  font-size: 28px;
+  width: 48px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-size: 12px;
+  font-weight: 900;
 }
 
 .heatmap-placeholder p {
   margin: 0;
-  font-weight: 600;
-  color: #334155;
+  font-weight: 700;
+  color: var(--muted-strong);
 }
 
 .heatmap-placeholder span {
-  color: #64748b;
+  color: var(--muted);
   font-size: 13px;
 }
 </style>

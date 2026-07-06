@@ -39,17 +39,17 @@ const totalPages = computed(() => Math.max(1, Math.ceil(props.total / props.page
 }
 
 .pagination span {
-  color: #64748b;
+  color: var(--muted);
   font-size: 14px;
 }
 
 .pagination button {
   height: 36px;
   padding: 0 14px;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  background: #fff;
-  color: #334155;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--muted-strong);
   cursor: pointer;
 }
 

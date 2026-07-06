@@ -21,10 +21,10 @@
   gap: 6px;
   min-height: 38px;
   padding: 0 14px;
-  border: 1px solid #bfd0c7;
+  border: 1px solid var(--line-strong);
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.94);
-  color: #33463d;
+  color: var(--muted-strong);
   text-decoration: none;
   font-size: 14px;
   font-weight: 700;
@@ -41,9 +41,9 @@
 }
 
 .back-home:hover {
-  border-color: #087443;
-  color: #087443;
-  background: #e1f4eb;
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
   transform: translateY(-1px);
 }
 </style>

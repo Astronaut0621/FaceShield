@@ -63,10 +63,10 @@ function goDetail(taskId) {
 <style scoped>
 .history-table {
   background: rgba(255, 255, 255, 0.96);
-  border: 1px solid #d8e4de;
+  border: 1px solid var(--line);
   border-radius: 18px;
   overflow: hidden;
-  box-shadow: 0 16px 42px rgba(16, 35, 27, 0.07);
+  box-shadow: 0 16px 42px rgba(23, 32, 51, 0.07);
 }
 
 .row {
@@ -75,14 +75,14 @@ function goDetail(taskId) {
   gap: 12px;
   align-items: center;
   padding: 12px 16px;
-  border-bottom: 1px solid #e5eee9;
+  border-bottom: 1px solid var(--line);
 }
 
 .row.head {
-  background: #f6faf8;
+  background: var(--surface-soft);
   font-size: 13px;
   font-weight: 700;
-  color: #33463d;
+  color: var(--muted-strong);
 }
 
 .row.body {
@@ -91,7 +91,7 @@ function goDetail(taskId) {
 }
 
 .row.body:hover {
-  background: #f6faf8;
+  background: var(--surface-soft);
 }
 
 .row:last-child {
@@ -103,7 +103,7 @@ function goDetail(taskId) {
   height: 48px;
   object-fit: cover;
   border-radius: 12px;
-  border: 1px solid #d8e4de;
+  border: 1px solid var(--line);
 }
 
 .thumb-empty {
@@ -125,8 +125,8 @@ function goDetail(taskId) {
 }
 
 .label-tag.real {
-  background: #e1f4eb;
-  color: #087443;
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 .label-tag.fake {
@@ -136,7 +136,7 @@ function goDetail(taskId) {
 
 .time {
   font-size: 13px;
-  color: #60756b;
+  color: var(--muted);
 }
 
 .link-btn {
@@ -144,15 +144,15 @@ function goDetail(taskId) {
   padding: 0 10px;
   border: 0;
   border-radius: 9px;
-  background: #e1f4eb;
-  color: #065f36;
+  background: var(--accent-soft);
+  color: var(--accent);
   cursor: pointer;
   font-size: 13px;
   font-weight: 700;
 }
 
 .link-btn:hover {
-  background: #087443;
+  background: var(--accent);
   color: #fff;
   box-shadow: none;
 }

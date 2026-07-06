@@ -77,11 +77,11 @@ async function submit() {
   display: grid;
   place-items: center;
   border-radius: 15px;
-  background: #087443;
+  background: var(--accent);
   color: #fff;
   font-size: 22px;
   font-weight: 900;
-  box-shadow: 0 14px 34px rgba(8, 116, 67, 0.22);
+  box-shadow: 0 14px 34px rgba(37, 99, 235, 0.22);
 }
 
 .brand h1 {
@@ -92,27 +92,27 @@ async function submit() {
 
 .brand p {
   margin: 0;
-  color: #60756b;
+  color: var(--muted);
   font-size: 14px;
 }
 
 .demo-hint {
   margin: 0;
   text-align: center;
-  color: #60756b;
+  color: var(--muted);
   font-size: 12px;
 }
 
 .back-link {
   display: block;
   text-align: center;
-  color: #33463d;
+  color: var(--muted-strong);
   font-size: 13px;
   font-weight: 650;
   text-decoration: none;
 }
 
 .back-link:hover {
-  color: #087443;
+  color: var(--accent);
 }
 </style>

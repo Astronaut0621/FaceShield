@@ -12,6 +12,7 @@ from app.domain.risk_policy import RiskPolicy
 from app.models.detection_result import DetectionResult
 from app.repositories.detection_repository import DetectionRepository
 from app.repositories.file_repository import FileRepository
+from app.repositories.model_repository import ModelRepository
 
 logger = logging.getLogger(__name__)
 
@@ -20,8 +21,14 @@ class DetectionService:
     def __init__(self, db: Session):
         self.file_repository = FileRepository(db)
         self.detection_repository = DetectionRepository(db)
+        self.model_repository = ModelRepository(db)
 
-    def start_detection(self, file_id: int, user_id: int | None = None) -> DetectionResult:
+    def start_detection(
+        self,
+        file_id: int,
+        user_id: int | None = None,
+        model_id: int | None = None,
+    ) -> DetectionResult:
         file_record = self.file_repository.get_active(file_id, user_id=user_id)
         if file_record is None:
             raise NotFoundError("File record not found.")
@@ -61,6 +68,13 @@ class DetectionService:
                 )
                 heatmap_url = heatmap.heatmap_url
 
+            selected_model = self.model_repository.get_by_id(model_id) if model_id else None
+            model_name = prediction.get("model_name")
+            model_version = prediction.get("model_version")
+            if selected_model is not None:
+                model_name = selected_model.model_name
+                model_version = selected_model.version
+
             result = self.detection_repository.create_result(
                 task_id=task.id,
                 user_id=user_id,
@@ -75,8 +89,8 @@ class DetectionService:
                 face_crop_url=crop.crop_url,
                 face_detected=crop.face_detected,
                 suggestion=RiskPolicy.suggestion_for(risk_level),
-                model_name=prediction.get("model_name"),
-                model_version=prediction.get("model_version"),
+                model_name=model_name,
+                model_version=model_version,
             )
 
             self.detection_repository.mark_task_success(task)

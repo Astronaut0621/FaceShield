@@ -87,10 +87,10 @@ defineProps({
   display: grid;
   gap: 24px;
   background: rgba(255, 255, 255, 0.96);
-  border: 1px solid #d8e4de;
+  border: 1px solid var(--line);
   border-radius: 20px;
   padding: 24px;
-  box-shadow: 0 16px 42px rgba(16, 35, 27, 0.07);
+  box-shadow: 0 16px 42px rgba(23, 32, 51, 0.07);
 }
 
 .result-header {
@@ -103,7 +103,7 @@ defineProps({
 
 .result-kicker {
   margin: 0 0 4px;
-  color: #60756b;
+  color: var(--muted);
   font-size: 13px;
   font-weight: 750;
 }
@@ -114,7 +114,7 @@ defineProps({
 }
 
 .verdict.real {
-  color: #087443;
+  color: var(--accent);
 }
 
 .verdict.fake {
@@ -126,8 +126,8 @@ defineProps({
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 16px;
   padding: 16px;
-  background: #f6faf8;
-  border: 1px solid #e5eee9;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
   border-radius: 16px;
 }
 
@@ -137,12 +137,12 @@ defineProps({
 }
 
 .meta-item span {
-  color: #60756b;
+  color: var(--muted);
   font-size: 13px;
 }
 
 .meta-item strong {
-  color: #10231b;
+  color: var(--text);
 }
 
 .score-grid {
@@ -153,9 +153,9 @@ defineProps({
 .suggestion {
   margin: 0;
   padding: 14px 16px;
-  border-left: 4px solid #087443;
-  background: #e1f4eb;
-  color: #065f36;
+  border-left: 4px solid var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
   border-radius: 0 12px 12px 0;
   line-height: 1.6;
 }
@@ -175,7 +175,7 @@ defineProps({
 .image-card figcaption {
   font-size: 14px;
   font-weight: 600;
-  color: #33463d;
+  color: var(--muted-strong);
 }
 
 .image-card img {
@@ -183,18 +183,18 @@ defineProps({
   max-height: 280px;
   object-fit: contain;
   border-radius: 16px;
-  background: #10231b;
-  border: 1px solid #d8e4de;
+  background: var(--text);
+  border: 1px solid var(--line);
 }
 
 .image-empty {
   display: grid;
   place-items: center;
   min-height: 180px;
-  border: 1px dashed #bfd0c7;
+  border: 1px dashed var(--line-strong);
   border-radius: 16px;
-  background: #f6faf8;
-  color: #60756b;
+  background: var(--surface-soft);
+  color: var(--muted);
   font-size: 14px;
   text-align: center;
   padding: 16px;

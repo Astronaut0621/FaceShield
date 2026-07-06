@@ -16,3 +16,12 @@ class ModelService:
         data = serialize_model_version(model)
         data["algorithm"] = get_algorithm_status()
         return data
+
+    def list_models(self) -> list[dict]:
+        return [serialize_model_version(model) for model in self.repository.list_all()]
+
+    def get_model(self, model_id: int) -> dict | None:
+        model = self.repository.get_by_id(model_id)
+        if model is None:
+            return None
+        return serialize_model_version(model)

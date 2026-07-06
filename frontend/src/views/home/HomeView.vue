@@ -10,9 +10,9 @@
       </div>
     </div>
 
-    <section id="features" class="features-section">
+    <section id="features" class="features-section" aria-labelledby="features-title">
       <div class="section-heading">
-        <h2>从上传到判定，一次完成</h2>
+        <h2 id="features-title">从上传到判定，一次完成</h2>
         <p>面向图片取证、身份核验和内容审核场景，保留可解释的检测链路。</p>
       </div>
       <div class="features-grid">
@@ -44,7 +44,7 @@ const features = [
   },
   {
     index: '03',
-    title: 'Grad-CAM 热力图',
+    title: '热力图解释',
     desc: '可视化模型关注区域，定位最可疑的伪造部位。'
   },
   {
@@ -58,7 +58,7 @@ const features = [
 <style scoped>
 .home-page {
   min-height: 100dvh;
-  background: #eef3f1;
+  background: var(--bg);
 }
 
 .hero-shell {
@@ -71,13 +71,13 @@ const features = [
   display: flex;
   flex-direction: column;
   min-height: calc(100dvh - 36px);
-  border-radius: 26px;
+  border-radius: 24px;
   overflow: hidden;
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(246, 250, 248, 0.9)),
-    #fff;
-  border: 1px solid rgba(216, 228, 222, 0.9);
-  box-shadow: 0 28px 80px rgba(16, 35, 27, 0.12);
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(247, 249, 252, 0.92)),
+    var(--surface);
+  border: 1px solid rgba(216, 224, 236, 0.9);
+  box-shadow: var(--shadow);
 }
 
 .hero-footer {
@@ -102,7 +102,7 @@ const features = [
 
 .section-heading h2 {
   margin: 0;
-  color: #10231b;
+  color: var(--text);
   font-size: clamp(26px, 4vw, 42px);
   font-weight: 850;
   letter-spacing: -0.02em;
@@ -110,7 +110,7 @@ const features = [
 
 .section-heading p {
   margin: 0;
-  color: #60756b;
+  color: var(--muted);
   font-size: 15px;
   max-width: 58ch;
 }
@@ -124,17 +124,23 @@ const features = [
 .feature-card {
   display: grid;
   align-content: start;
-  min-height: 190px;
-  background: #fff;
+  min-height: 196px;
+  background: var(--surface);
   border-radius: 18px;
   padding: 22px;
-  border: 1px solid #d8e4de;
-  box-shadow: 0 14px 36px rgba(16, 35, 27, 0.06);
+  border: 1px solid var(--line);
+  box-shadow: 0 14px 36px rgba(23, 32, 51, 0.06);
 }
 
-.feature-card:nth-child(2),
-.feature-card:nth-child(4) {
-  background: #f6faf8;
+.feature-card:first-child {
+  grid-column: span 2;
+  background:
+    linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(147, 197, 253, 0.12)),
+    var(--surface);
+}
+
+.feature-card:nth-child(3) {
+  background: var(--surface-soft);
 }
 
 .feature-icon {
@@ -144,8 +150,8 @@ const features = [
   place-items: center;
   margin-bottom: 22px;
   border-radius: 11px;
-  background: #e1f4eb;
-  color: #065f36;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
   font-size: 13px;
   font-weight: 850;
 }
@@ -153,13 +159,13 @@ const features = [
 .feature-card h3 {
   margin: 0 0 9px;
   font-size: 17px;
-  color: #10231b;
+  color: var(--text);
 }
 
 .feature-card p {
   margin: 0;
   font-size: 13px;
-  color: #60756b;
+  color: var(--muted);
   line-height: 1.65;
 }
 
@@ -190,6 +196,10 @@ const features = [
 
   .features-grid {
     grid-template-columns: 1fr;
+  }
+
+  .feature-card:first-child {
+    grid-column: auto;
   }
 }
 </style>

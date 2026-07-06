@@ -1,5 +1,5 @@
 <template>
-  <aside class="guide-panel">
+  <aside class="guide-panel" aria-label="检测说明">
     <section class="guide-block">
       <h3>检测流程</h3>
       <ol class="steps">
@@ -29,8 +29,8 @@
     <section class="guide-block tips">
       <h3>使用提示</h3>
       <ul>
-        <li>请上传清晰、正面的人脸照片，效果更佳</li>
-        <li>支持 JPG / JPEG / PNG，单张图片检测</li>
+        <li>上传清晰、正面的人脸照片，检测效果更稳定</li>
+        <li>支持 JPG、JPEG、PNG，单张图片检测</li>
         <li>检测完成后可查看概率、风险等级与热力图</li>
       </ul>
     </section>
@@ -40,15 +40,15 @@
 <script setup>
 const steps = [
   { title: '上传图片', desc: '拖拽或选择待检测人脸图片' },
-  { title: '特征提取', desc: '人脸裁剪 + 频域 FFT + 空域 CNN' },
-  { title: '融合推理', desc: '双分支特征融合，输出伪造概率' },
-  { title: '结果可视化', desc: '风险等级 + Grad-CAM 可疑区域' }
+  { title: '选择模型', desc: '使用默认模型，或指定可用检测模型' },
+  { title: '融合推理', desc: '频域 FFT 与空域 CNN 共同判断' },
+  { title: '结果可视化', desc: '输出风险等级与可疑区域热力图' }
 ]
 
 const techItems = [
   { code: 'FFT', title: '频域分支', desc: '幅度谱捕捉高频伪影与压缩残留' },
   { code: 'CNN', title: '空域分支', desc: '纹理分析识别换脸边界痕迹' },
-  { code: 'CAM', title: '热力图', desc: 'Grad-CAM 高亮模型关注区域' }
+  { code: 'CAM', title: '热力图', desc: '高亮模型关注区域' }
 ]
 </script>
 
@@ -60,16 +60,16 @@ const techItems = [
 
 .guide-block {
   background: rgba(255, 255, 255, 0.96);
-  border: 1px solid #d8e4de;
+  border: 1px solid var(--line);
   border-radius: 18px;
   padding: 20px;
-  box-shadow: 0 14px 34px rgba(16, 35, 27, 0.05);
+  box-shadow: 0 14px 34px rgba(23, 32, 51, 0.05);
 }
 
 .guide-block h3 {
   margin: 0 0 16px;
   font-size: 15px;
-  color: #10231b;
+  color: var(--text);
 }
 
 .steps {
@@ -93,8 +93,8 @@ const techItems = [
   display: grid;
   place-items: center;
   border-radius: 11px;
-  background: #e1f4eb;
-  color: #065f36;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
   font-size: 13px;
   font-weight: 900;
 }
@@ -102,14 +102,14 @@ const techItems = [
 .steps strong {
   display: block;
   font-size: 14px;
-  color: #10231b;
+  color: var(--text);
   margin-bottom: 2px;
 }
 
 .steps p {
   margin: 0;
   font-size: 13px;
-  color: #60756b;
+  color: var(--muted);
   line-height: 1.5;
 }
 
@@ -123,8 +123,8 @@ const techItems = [
   gap: 12px;
   padding: 12px;
   border-radius: 14px;
-  background: #f6faf8;
-  border: 1px solid #e5eee9;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
 }
 
 .tech-icon {
@@ -133,8 +133,8 @@ const techItems = [
   display: grid;
   place-items: center;
   border-radius: 11px;
-  background: #10231b;
-  color: #5eeaa2;
+  background: var(--text);
+  color: var(--accent-glow);
   font-size: 11px;
   font-weight: 900;
   flex-shrink: 0;
@@ -143,21 +143,21 @@ const techItems = [
 .tech-card strong {
   display: block;
   font-size: 13px;
-  color: #10231b;
+  color: var(--text);
   margin-bottom: 2px;
 }
 
 .tech-card p {
   margin: 0;
   font-size: 12px;
-  color: #60756b;
+  color: var(--muted);
   line-height: 1.5;
 }
 
 .tips ul {
   margin: 0;
   padding-left: 18px;
-  color: #60756b;
+  color: var(--muted);
   font-size: 13px;
   line-height: 1.85;
 }

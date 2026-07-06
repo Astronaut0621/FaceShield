@@ -76,10 +76,10 @@ async function signOut() {
   display: grid;
   place-items: center;
   border-radius: 12px;
-  background: linear-gradient(135deg, #5eeaa2, #087443);
-  color: #062117;
+  background: linear-gradient(135deg, var(--accent-glow), var(--accent));
+  color: #0f172a;
   font-weight: 900;
-  box-shadow: 0 12px 28px rgba(8, 116, 67, 0.28);
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.28);
   flex-shrink: 0;
 }
 
@@ -92,7 +92,7 @@ async function signOut() {
 
 .brand-block p {
   margin: 3px 0 0;
-  color: rgba(231, 241, 236, 0.62);
+  color: rgba(226, 232, 240, 0.68);
   font-size: 12px;
 }
 
@@ -110,25 +110,25 @@ async function signOut() {
   place-items: center;
   border-radius: 9px;
   background: rgba(255, 255, 255, 0.07);
-  color: rgba(231, 241, 236, 0.82);
+  color: rgba(226, 232, 240, 0.82);
   font-size: 12px;
   font-weight: 800;
   flex-shrink: 0;
 }
 
 .sidebar nav a.active .nav-icon {
-  background: rgba(94, 234, 162, 0.18);
-  color: #5eeaa2;
+  background: rgba(147, 197, 253, 0.18);
+  color: var(--accent-glow);
 }
 
 .session-label {
-  color: rgba(231, 241, 236, 0.52);
+  color: rgba(226, 232, 240, 0.56);
   font-size: 12px;
 }
 
 .user-name {
   font-weight: 750;
-  color: #e7f1ec;
+  color: #e2e8f0;
   overflow: hidden;
   text-overflow: ellipsis;
 }

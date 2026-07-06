@@ -19,3 +19,11 @@ def get_model_version(
         raise NotFoundError("Active model version not found.")
     return success(data, message="Query successful.")
 
+
+@router.get("/list")
+def list_model_versions(
+    current_user: User = Depends(get_current_user),
+    service: ModelService = Depends(get_model_service),
+):
+    return success(service.list_models(), message="Query successful.")
+

@@ -27,7 +27,7 @@
       </label>
     </div>
 
-    <LoadingState :active="loading" message="加载历史记录…" />
+    <LoadingState :active="loading" message="加载历史记录..." />
     <InlineError :message="error" />
 
     <HistoryTable v-if="historyStore.items.length" :items="historyStore.items" />
@@ -116,7 +116,7 @@ onMounted(load)
   margin-bottom: 18px;
   padding: 14px;
   background: rgba(255, 255, 255, 0.82);
-  border: 1px solid #d8e4de;
+  border: 1px solid var(--line);
   border-radius: 16px;
 }
 
@@ -124,14 +124,14 @@ onMounted(load)
   display: grid;
   gap: 6px;
   font-size: 13px;
-  color: #33463d;
+  color: var(--muted-strong);
   font-weight: 700;
 }
 
 .filters select {
   height: 36px;
   min-width: 140px;
-  border: 1px solid #bfd0c7;
+  border: 1px solid var(--line-strong);
   border-radius: 10px;
   padding: 0 10px;
   background: #fff;
