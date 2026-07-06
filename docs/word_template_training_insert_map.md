@@ -101,7 +101,7 @@
 - 产品功能：图片上传、人脸预处理、模型推理、伪造概率、风险等级、检测记录。
 - 数据流图：用户图片 -> 后端上传接口 -> 人脸裁剪 -> 模型推理 -> 检测结果 -> 数据库存储。
 - 数据字典：`image_path`、`model_version`、`fake_probability`、`risk_level`、`prediction`、`created_at`。
-- 支持软件：Python、FastAPI、PaddlePaddle、Vue、openGauss。
+- 支持软件：Python、FastAPI、PaddlePaddle、Vue、MySQL。
 
 不建议写：
 

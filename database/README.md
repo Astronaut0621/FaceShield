@@ -1,6 +1,6 @@
 # FaceShield Database Framework
 
-This folder defines the database framework and conventions only. It does not run migrations or provision an openGauss instance.
+This folder defines the database framework and conventions only. It does not run migrations or provision a MySQL instance.
 
 ## Structure
 
@@ -18,7 +18,7 @@ scripts/    Placeholder scripts for future migration automation
 The backend reads `DATABASE_URL`.
 
 ```text
-DATABASE_URL=postgresql+psycopg2://gaussdb:your_password@localhost:5432/faceshield
+DATABASE_URL=mysql+pymysql://faceshield_user:your_password@localhost:3306/faceshield_db?charset=utf8mb4
 ```
 
 When `DATABASE_URL` is not set, the backend uses a local SQLite development database.

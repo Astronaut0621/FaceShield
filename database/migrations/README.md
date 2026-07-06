@@ -10,5 +10,5 @@ Suggested naming:
 0003_add_model_registry.sql
 ```
 
-The current prototype uses SQLAlchemy `create_all` in development and `database/sql/001_init_opengauss.sql` as the openGauss bootstrap reference.
+The current prototype uses SQLAlchemy `create_all` in development and `database/sql/001_init_mysql.sql` as the MySQL bootstrap reference.
 

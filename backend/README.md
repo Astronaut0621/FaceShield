@@ -39,16 +39,16 @@ GET http://localhost:8000/api/health
 backend/faceshield.db
 ```
 
-连接 openGauss 时设置：
+连接 MySQL 时设置：
 
 ```text
-DATABASE_URL=postgresql+psycopg2://gaussdb:your_password@localhost:5432/faceshield
+DATABASE_URL=mysql+pymysql://faceshield_user:your_password@localhost:3306/faceshield_db?charset=utf8mb4
 ```
 
-openGauss 初始化 SQL 位于：
+MySQL 初始化 SQL 位于：
 
 ```text
-database/sql/001_init_opengauss.sql
+database/sql/001_init_mysql.sql
 ```
 
 ## 算法后端

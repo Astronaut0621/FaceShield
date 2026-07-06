@@ -7,6 +7,6 @@ Initial logical schema:
 - `detection_task`: detection task lifecycle.
 - `detection_result`: model result payload.
 - `model_version`: model metadata and active version marker.
-- `detection_records`: openGauss view aligning with the development spec record naming.
+- `detection_records`: MySQL view aligning with the development spec record naming.
 
-The canonical SQL snapshot is `database/sql/001_init_opengauss.sql`.
+The canonical SQL snapshot is `database/sql/001_init_mysql.sql`.
