@@ -1,0 +1,16 @@
+{
+  "image": "D:\\FaceShield\\data\\ffpp_faces\\test\\real\\035_000001.jpg",
+  "model": "fusion_v2",
+  "checkpoint": "model\\deploy\\fusion_v2\\best.pdparams",
+  "config": "model\\deploy\\fusion_v2\\config.json",
+  "target_class_mode": "fake",
+  "spatial_cam_note": "Grad-CAM is computed on the RGB spatial branch last feature map.",
+  "input_image": "model\\gradcam\\fusion_v2_real_demo\\input.jpg",
+  "heatmap_image": "model\\gradcam\\fusion_v2_real_demo\\heatmap.jpg",
+  "overlay_image": "model\\gradcam\\fusion_v2_real_demo\\overlay.jpg",
+  "target_class": "fake",
+  "predicted_label": "real",
+  "real_probability": 0.9985116124153137,
+  "fake_probability": 0.0014883206458762288,
+  "risk_level": "low"
+}

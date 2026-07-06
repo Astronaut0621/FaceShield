@@ -1,0 +1,16 @@
+{
+  "image": "data\\ffpp_faces\\test\\fake\\035_036_000001.jpg",
+  "model": "fusion_v2",
+  "checkpoint": "model\\deploy\\fusion_v2\\best.pdparams",
+  "config": "model\\deploy\\fusion_v2\\config.json",
+  "target_class_mode": "fake",
+  "spatial_cam_note": "Grad-CAM is computed on the RGB spatial branch last feature map.",
+  "input_image": "model\\gradcam\\fusion_v2_fake_demo\\input.jpg",
+  "heatmap_image": "model\\gradcam\\fusion_v2_fake_demo\\heatmap.jpg",
+  "overlay_image": "model\\gradcam\\fusion_v2_fake_demo\\overlay.jpg",
+  "target_class": "fake",
+  "predicted_label": "fake",
+  "real_probability": 5.954300286248326e-05,
+  "fake_probability": 0.9999403953552246,
+  "risk_level": "high"
+}

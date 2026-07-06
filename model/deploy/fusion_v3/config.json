@@ -1,0 +1,28 @@
+{
+  "data_root": "data/ffpp_faces",
+  "manifest": "face_manifest_clean.csv",
+  "model": "fusion_v3",
+  "output_dir": "outputs/fusion_v3_seed42",
+  "device": "gpu",
+  "image_size": 224,
+  "epochs": 30,
+  "batch_size": 32,
+  "lr": 0.0005,
+  "weight_decay": 0.0001,
+  "dropout": 0.3,
+  "feature_dim": 128,
+  "num_workers": 0,
+  "patience": 8,
+  "seed": 42,
+  "no_augment": false,
+  "spatial_checkpoint": "outputs/baseline/best.pdparams",
+  "freeze_spatial_epochs": 3,
+  "manifest_path": "data/ffpp_faces/face_manifest_clean.csv",
+  "paddle_version": "2.4.0",
+  "device_used": "gpu:0",
+  "split_sizes": {
+    "train": 3769,
+    "val": 1284,
+    "test": 1092
+  }
+}
