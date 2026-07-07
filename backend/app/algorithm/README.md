@@ -80,7 +80,7 @@ model_version: fusion_v2-202607
 
 ## 热力图说明
 
-当前后端生成的是降级可视化热力图，用于前端展示和检测记录闭环，不是严格 Grad-CAM。后续如果接入 Grad-CAM，应保持 `heatmap_url` 字段不变，替换 `postprocess` 中的生成逻辑即可。
+Paddle 后端会基于 RGB 空域分支最后一层特征图生成 Grad-CAM 热力图，并通过 `heatmap_path` 交给检测服务保存到 `/storage/heatmaps`。mock 模式或 Grad-CAM 生成失败时，后端会使用 fallback 热力图，保证前端展示和检测记录闭环。
 
 ## 状态检查
 

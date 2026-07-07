@@ -192,7 +192,7 @@ GET /api/model-version
 
 ## 8. 已知限制
 
-1. 当前热力图是降级可视化实现，不是严格 Grad-CAM。
+1. Paddle 后端已接入 Grad-CAM 热力图；mock 模式或 Grad-CAM 生成失败时会使用 fallback 热力图。
 2. CPU 推理可以运行，但不适合高并发或大批量检测。
 3. 训练时使用 PaddlePaddle 2.4.0，当前本机推理验证使用 PaddlePaddle 3.3.1；现有权重可加载，但后续如升级模型结构，应重新做兼容性验证。
 4. 当前只支持图片级检测，不支持视频级时序判断。

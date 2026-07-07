@@ -873,7 +873,7 @@ fusion_v2 主配置 seed42：test AUC **0.9014**，F1 **0.8348**。
 
 1. 当前主要为 Deepfakes 类型；
 2. 图片级，不支持视频；
-3. 热力图为降级方案，严格 Grad-CAM 待完善。
+3. Paddle 后端已接入 Grad-CAM 热力图，mock 模式或生成失败时使用 fallback 热力图兜底。
 
 ## 5 分析摘要
 
@@ -897,7 +897,7 @@ fusion_v2 主配置 seed42：test AUC **0.9014**，F1 **0.8348**。
 2. 尝试 attention 融合；
 3. 升级 backbone 为 ResNet18 等；
 4. 扩展 Face2Face、FaceSwap 等伪造类型；
-5. 完善 Grad-CAM 热力图。
+5. 继续优化 Grad-CAM 展示质量与错误案例分析。
 
 ### 5.4 评价
 

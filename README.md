@@ -25,6 +25,26 @@ tools/      FaceForensics++ 下载、抽帧、人脸裁剪辅助脚本
 
 ## 后端启动
 
+首次本地运行可以先复制环境变量模板：
+
+```powershell
+Copy-Item .env.example .env
+```
+
+`.env` 中默认使用 `mock` 算法后端，适合前端联调和无 Paddle 环境演示：
+
+```env
+FACESHIELD_ALGORITHM_BACKEND=mock
+```
+
+如果要使用真实 Paddle 模型和在线 Grad-CAM 热力图，将 `.env` 改为：
+
+```env
+FACESHIELD_ALGORITHM_BACKEND=paddle
+FACESHIELD_MODEL_PATH=D:/FaceShield/model/deploy/fusion_v2/best.pdparams
+FACESHIELD_MODEL_CONFIG_PATH=D:/FaceShield/model/deploy/fusion_v2/config.json
+```
+
 ```bash
 cd backend
 pip install -r requirements.txt
@@ -37,19 +57,7 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 DATABASE_URL=mysql+pymysql://faceshield_user:your_password@localhost:3306/faceshield_db?charset=utf8mb4
 ```
 
-默认算法后端是 `mock`，适合快速演示和无模型环境：
-
-```text
-FACESHIELD_ALGORITHM_BACKEND=mock
-```
-
-使用真实 Paddle 模型：
-
-```powershell
-$env:FACESHIELD_ALGORITHM_BACKEND='paddle'
-cd backend
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
+也可以不改 `.env`，在 PowerShell 中临时设置环境变量后启动后端。注意：如果前端 Vite 代理使用 `8010`，后端端口也要用 `8010`。
 
 健康检查：
 

@@ -17,5 +17,5 @@
 - 后端支持 `mock` 和 `paddle` 两种算法后端。
 - `paddle` 后端已能加载 `model/deploy/fusion_v2` 权重进行真实推理。
 - 人脸裁剪优先使用 OpenCV Haar Cascade，失败时中心裁剪兜底。
-- 热力图当前为降级可视化实现，严格 Grad-CAM 尚未接入。
+- Paddle 后端已接入 Grad-CAM 热力图；mock 模式或生成失败时使用 fallback 热力图。
 - 历史记录按登录用户隔离。

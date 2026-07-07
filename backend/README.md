@@ -4,6 +4,8 @@ FaceShield 后端基于 FastAPI 构建，负责登录认证、图片上传、算
 
 ## 启动
 
+项目根目录提供 `.env.example`，可复制为 `.env` 后切换 `mock` 或 `paddle` 算法后端。
+
 ```bash
 pip install -r requirements.txt
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
@@ -107,7 +109,7 @@ backend/storage/paddle_home
 -> 返回前端展示字段
 ```
 
-说明：当前热力图为降级可视化实现，用于展示链路和结果解释占位；严格 Grad-CAM 尚未接入。
+说明：Paddle 后端会基于 RGB 空域分支最后一层特征图生成 Grad-CAM 热力图；mock 模式或 Grad-CAM 生成失败时，会自动使用 fallback 热力图保证展示链路不断。
 
 ## 主要接口
 
