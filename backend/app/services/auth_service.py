@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.core.security import create_access_token, verify_password
 from app.domain.exceptions import NotFoundError, ValidationError
 from app.models.user import User
@@ -20,6 +21,7 @@ class AuthService:
         return {
             "access_token": create_access_token(user.id, user.username),
             "token_type": "bearer",
+            "expires_in": settings.ACCESS_TOKEN_EXPIRE_SECONDS,
             "user": serialize_user(user),
         }
 
@@ -31,4 +33,3 @@ class AuthService:
         if user is None or user.status != "active":
             raise NotFoundError("User not found.")
         return user
-

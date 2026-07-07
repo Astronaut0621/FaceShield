@@ -27,6 +27,7 @@ class Settings:
     MAX_UPLOAD_SIZE = int(os.getenv("MAX_UPLOAD_SIZE", str(10 * 1024 * 1024)))
     ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png"}
     SECRET_KEY = os.getenv("SECRET_KEY", "faceshield-dev-secret-change-me")
+    ACCESS_TOKEN_EXPIRE_SECONDS = int(os.getenv("ACCESS_TOKEN_EXPIRE_SECONDS", str(7 * 24 * 60 * 60)))
     DEMO_USERNAME = os.getenv("DEMO_USERNAME", "demo")
     DEMO_PASSWORD = os.getenv("DEMO_PASSWORD", "demo123456")
     DEMO_DISPLAY_NAME = os.getenv("DEMO_DISPLAY_NAME", "Demo User")
@@ -34,7 +35,7 @@ class Settings:
         origin.strip()
         for origin in os.getenv(
             "CORS_ORIGINS",
-            "http://localhost:5173,http://127.0.0.1:5173",
+            "http://localhost:5173,http://127.0.0.1:5173,http://10.0.2.2:5173",
         ).split(",")
         if origin.strip()
     ]

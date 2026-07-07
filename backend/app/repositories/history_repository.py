@@ -59,10 +59,9 @@ class HistoryRepository:
             .join(FileRecord, FileRecord.id == DetectionResult.file_id)
             .where(*self._filters(user_id=user_id, label=label, risk_level=risk_level))
             .order_by(DetectionResult.created_at.desc(), DetectionResult.id.desc())
-            .offset(offset)
-            .limit(limit)
         )
-        return self._filter_existing_rows(self.db.execute(stmt).all())
+        rows = self._filter_existing_rows(self.db.execute(stmt).all())
+        return rows[offset : offset + limit]
 
     def get_detail(self, task_id: int, user_id: int | None = None):
         filters = [DetectionResult.task_id == task_id, FileRecord.is_deleted.is_(False)]

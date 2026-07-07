@@ -4,20 +4,25 @@ import { getApiErrorMessage } from '../utils/api-response'
 export function useAsyncTask() {
   const loading = ref(false)
   const error = ref('')
+  let currentRunId = 0
 
   async function run(task, fallbackMessage) {
+    const runId = ++currentRunId
     loading.value = true
     error.value = ''
     try {
       return await task()
     } catch (err) {
-      error.value = getApiErrorMessage(err, fallbackMessage)
+      if (runId === currentRunId) {
+        error.value = getApiErrorMessage(err, fallbackMessage)
+      }
       return null
     } finally {
-      loading.value = false
+      if (runId === currentRunId) {
+        loading.value = false
+      }
     }
   }
 
   return { loading, error, run }
 }
-

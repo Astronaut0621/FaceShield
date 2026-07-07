@@ -36,6 +36,7 @@ def decode_access_token(token: str) -> tuple[int, str] | None:
     try:
         raw_token = base64.urlsafe_b64decode(token.encode("ascii")).decode("utf-8")
         user_id_text, username, issued_at, signature = raw_token.rsplit(":", 3)
+        issued_at_seconds = int(issued_at)
     except Exception:
         return None
 
@@ -43,5 +44,7 @@ def decode_access_token(token: str) -> tuple[int, str] | None:
     expected = hmac.new(settings.SECRET_KEY.encode("utf-8"), payload.encode("utf-8"), hashlib.sha256).hexdigest()
     if not hmac.compare_digest(signature, expected):
         return None
+    if settings.ACCESS_TOKEN_EXPIRE_SECONDS > 0:
+        if int(time.time()) - issued_at_seconds > settings.ACCESS_TOKEN_EXPIRE_SECONDS:
+            return None
     return int(user_id_text), username
-

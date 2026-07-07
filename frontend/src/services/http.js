@@ -4,7 +4,7 @@ import { authStore } from '../stores/auth.store'
 
 export const http = axios.create({
   baseURL: appConfig.apiBaseUrl,
-  timeout: 60000
+  timeout: appConfig.requestTimeoutMs
 })
 
 http.interceptors.request.use(config => {

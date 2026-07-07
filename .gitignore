@@ -17,6 +17,12 @@ backend/storage/crops/*
 !backend/storage/crops/.gitkeep
 frontend/node_modules/
 frontend/dist/
+mobile/android-app/.gradle/
+mobile/android-app/build/
+mobile/android-app/app/build/
+mobile/android-app/local.properties
+mobile/android-app/**/*.apk
+mobile/android-app/**/*.aab
 
 # Local datasets and generated ML artifacts
 data/
