@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import logging
 from pathlib import Path
 from uuid import uuid4
 
 import numpy as np
 from PIL import Image
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -56,23 +59,44 @@ def _detect_largest_face(image: Image.Image) -> tuple[int, int, int, int] | None
     try:
         import cv2
     except ImportError:
+        logger.warning("OpenCV is not installed; using center crop fallback.")
         return None
     if not hasattr(cv2, "CascadeClassifier") or not hasattr(cv2, "data"):
+        logger.warning(
+            "OpenCV Haar Cascade face detection is unavailable in cv2 version %s; using center crop fallback.",
+            getattr(cv2, "__version__", "unknown"),
+        )
         return None
 
     gray = cv2.cvtColor(np.asarray(image), cv2.COLOR_RGB2GRAY)
+    equalized_gray = cv2.equalizeHist(gray)
     cascade_path = Path(cv2.data.haarcascades) / "haarcascade_frontalface_default.xml"
     detector = cv2.CascadeClassifier(str(cascade_path))
     if detector.empty():
+        logger.warning("Could not load Haar cascade from %s; using center crop fallback.", cascade_path)
         return None
 
-    faces = detector.detectMultiScale(
-        gray,
-        scaleFactor=1.1,
-        minNeighbors=5,
-        minSize=(40, 40),
+    min_face_size = max(24, min(40, min(image.width, image.height) // 5))
+    detection_attempts = (
+        (gray, 1.1, 5),
+        (equalized_gray, 1.1, 5),
+        (equalized_gray, 1.08, 5),
+        (equalized_gray, 1.05, 4),
     )
+    faces = []
+    for source_gray, scale_factor, min_neighbors in detection_attempts:
+        faces = detector.detectMultiScale(
+            source_gray,
+            scaleFactor=scale_factor,
+            minNeighbors=min_neighbors,
+            minSize=(min_face_size, min_face_size),
+            flags=cv2.CASCADE_SCALE_IMAGE,
+        )
+        if len(faces) > 0:
+            break
+
     if len(faces) == 0:
+        logger.info("No face detected by OpenCV Haar Cascade; using center crop fallback.")
         return None
 
     x, y, width, height = max(faces, key=lambda face: int(face[2]) * int(face[3]))

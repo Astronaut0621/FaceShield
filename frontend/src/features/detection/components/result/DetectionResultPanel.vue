@@ -49,7 +49,10 @@
       </figure>
 
       <figure class="image-card">
-        <figcaption>人脸裁剪</figcaption>
+        <figcaption class="image-caption">
+          <span>人脸裁剪</span>
+          <small v-if="result.faceCropUrl && result.faceDetected === false">中心裁剪</small>
+        </figcaption>
         <img
           v-if="result.faceCropUrl"
           :src="resolveStorageUrl(result.faceCropUrl)"
@@ -190,6 +193,23 @@ defineProps({
   font-size: 14px;
   font-weight: 600;
   color: var(--muted-strong);
+}
+
+.image-caption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.image-caption small {
+  flex: 0 0 auto;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .image-card img {
