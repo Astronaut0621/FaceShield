@@ -18,7 +18,7 @@ def start_detection_by_file(
     current_user: User = Depends(get_current_user),
     service: DetectionService = Depends(get_detection_service),
 ):
-    result = service.start_detection(payload.file_id, user_id=current_user.id)
+    result = service.start_detection(payload.file_id, user_id=current_user.id, model_id=payload.model_id)
     return success(serialize_detection_result(result), message="Detection completed.")
 
 

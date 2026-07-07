@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field
 
 class DetectionStartRequest(BaseModel):
     file_id: int = Field(..., ge=1)
+    model_id: int | None = Field(None, ge=1)
 
 
 class DetectionReport(BaseModel):

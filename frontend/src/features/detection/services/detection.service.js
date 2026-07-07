@@ -17,7 +17,11 @@ export async function getDetectionDetail(taskId) {
   return normalizeDetectionResult(unwrapApiResponse(response))
 }
 
-export async function startDetection(fileId) {
-  const response = await http.post('/detection/start', { file_id: fileId })
+export async function startDetection(fileId, modelId) {
+  const payload = { file_id: fileId }
+  if (modelId) {
+    payload.model_id = modelId
+  }
+  const response = await http.post('/detection/start', payload)
   return normalizeDetectionResult(unwrapApiResponse(response))
 }

@@ -1,4 +1,5 @@
 from collections.abc import Generator
+from pathlib import Path
 
 from sqlalchemy import create_engine, inspect, select, text
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
@@ -82,6 +83,46 @@ def init_db() -> None:
                 is_active=False,
             )
             db.add(fusion_model)
+            db.commit()
+
+        deploy_dir = Path(__file__).resolve().parents[2] / "model" / "deploy"
+        baseline_path = deploy_dir / "baseline" / "best.pdparams"
+        fusion_v3_path = deploy_dir / "fusion_v3" / "best.pdparams"
+
+        baseline_model = db.scalar(
+            select(ModelVersion).where(
+                ModelVersion.model_name == "FaceShield-Baseline",
+                ModelVersion.version == "baseline",
+            )
+        )
+        if baseline_model is None and baseline_path.exists():
+            db.add(
+                ModelVersion(
+                    model_name="FaceShield-Baseline",
+                    version="baseline",
+                    description="Baseline CNN model for face forgery detection.",
+                    model_path=str(baseline_path),
+                    is_active=False,
+                )
+            )
+            db.commit()
+
+        fusion_v3_model = db.scalar(
+            select(ModelVersion).where(
+                ModelVersion.model_name == "FaceShield-FusionV3",
+                ModelVersion.version == "fusion_v3",
+            )
+        )
+        if fusion_v3_model is None and fusion_v3_path.exists():
+            db.add(
+                ModelVersion(
+                    model_name="FaceShield-FusionV3",
+                    version="fusion_v3",
+                    description="Frequency-spatial fusion model using PaddleV3 checkpoint.",
+                    model_path=str(fusion_v3_path),
+                    is_active=False,
+                )
+            )
             db.commit()
 
         active_name = "FaceShield-MockNet" if algorithm_settings.backend == "mock" else algorithm_settings.model_name

@@ -27,7 +27,23 @@
           @update:model-value="onModelChange"
         />
 
+        <template v-if="isAssetMode">
+          <div class="asset-detect-panel">
+            <div class="asset-preview">
+              <img v-if="asset?.file_url" :src="resolveStorageUrl(asset.file_url)" alt="检测资产预览" />
+              <div class="asset-info">
+                <strong>{{ asset?.original_filename || '已选资产图片' }}</strong>
+                <p>{{ asset ? formatAssetMeta(asset) : '正在加载资产...' }}</p>
+              </div>
+            </div>
+            <button class="primary-btn" :disabled="loading" @click="submit">
+              {{ loading ? '检测中，请稍候...' : '使用该资产开始检测' }}
+            </button>
+          </div>
+        </template>
+
         <DetectionFileUploader
+          v-else
           v-model="detectionStore.currentFile"
           large
           :loading="loading"
@@ -51,31 +67,80 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import DetectionFileUploader from '@/features/detection/components/upload/DetectionFileUploader.vue'
 import ModelSelector from '@/features/detection/components/upload/ModelSelector.vue'
 import BackHomeLink from '@/shared/components/BackHomeLink.vue'
 import InlineError from '@/shared/components/InlineError.vue'
 import { routeNames } from '@/constants/routes'
-import { uploadAndDetect } from '@/features/detection/services/detection.service'
+import { uploadAndDetect, startDetection } from '@/features/detection/services/detection.service'
+import { getAsset } from '@/features/assets/services/asset.service'
 import { useAsyncTask } from '@/composables/useAsyncTask'
 import { detectionStore } from '@/stores/detection.store'
+import { resolveStorageUrl } from '@/utils/storage'
+import { formatFileSize } from '@/utils/formatters'
 
 const router = useRouter()
+const route = useRoute()
 const { loading, error, run } = useAsyncTask()
 const selectedModelId = ref(detectionStore.selectedModelId)
+const assetId = ref(null)
+const asset = ref(null)
+
+const isAssetMode = computed(() => Boolean(asset.value && assetId.value))
 
 const tags = ['频域 FFT', '空域 CNN', '热力图解释', '风险评级']
 
 watch(loading, value => detectionStore.setLoading(value))
 watch(error, value => detectionStore.setError(value))
 
+watch(
+  () => route.query.asset,
+  async assetValue => {
+    if (!assetValue) return
+    const id = Number(assetValue)
+    if (!id || assetId.value === id) return
+
+    assetId.value = id
+    await loadAsset(id)
+  },
+  { immediate: true }
+)
+
 function onModelChange(modelId) {
   detectionStore.setSelectedModelId(modelId || null)
 }
 
+async function loadAsset(id) {
+  const record = await run(() => getAsset(id), '加载资产内容失败。')
+  if (!record) {
+    asset.value = null
+    assetId.value = null
+    return
+  }
+  asset.value = record
+  // 使用资产模式时，清空上传文件，避免需要重新上传
+  detectionStore.setFile(null)
+}
+
+function formatAssetMeta(asset) {
+  return `${formatFileSize(asset.file_size)} · ${asset.file_type?.toUpperCase() || 'IMG'}`
+}
+
 async function submit() {
+  if (isAssetMode.value) {
+    if (!assetId.value) return
+    const result = await run(
+      () => startDetection(assetId.value, selectedModelId.value),
+      '检测失败，请稍后重试。'
+    )
+    if (!result) return
+    detectionStore.setResult(result)
+    router.push({ name: routeNames.result, params: { id: String(result.taskId) } })
+    return
+  }
+
   if (!detectionStore.currentFile) return
   const result = await run(
     () => uploadAndDetect(detectionStore.currentFile, selectedModelId.value),

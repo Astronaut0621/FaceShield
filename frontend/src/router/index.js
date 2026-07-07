@@ -7,6 +7,7 @@ import DetectiveView from '@/views/detective/DetectiveView.vue'
 import HistoryView from '@/views/history/HistoryView.vue'
 import HistoryDetailView from '@/views/history/HistoryDetailView.vue'
 import ResultView from '@/views/result/ResultView.vue'
+import AssetCenterView from '@/views/assets/AssetCenterView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -14,6 +15,7 @@ const router = createRouter({
     { path: '/', name: routeNames.home, component: HomeView, meta: { public: true, standalone: true } },
     { path: '/login', name: routeNames.login, component: LoginView, meta: { public: true, standalone: true } },
     { path: '/detective', name: routeNames.detective, component: DetectiveView },
+    { path: '/assets', name: routeNames.assets, component: AssetCenterView },
     { path: '/detection', redirect: '/detective' },
     { path: '/result/:id', name: routeNames.result, component: ResultView },
     { path: '/history', name: routeNames.history, component: HistoryView },

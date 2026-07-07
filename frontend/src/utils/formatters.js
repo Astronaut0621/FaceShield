@@ -39,6 +39,14 @@ export function formatDateTime(value) {
   })
 }
 
+export function formatFileSize(value) {
+  if (value === null || value === undefined || Number.isNaN(Number(value))) return '-'
+  const size = Number(value)
+  if (size < 1024) return `${size} B`
+  if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`
+  return `${(size / (1024 * 1024)).toFixed(2)} MB`
+}
+
 export function riskLevelClass(level) {
   return level ? `risk-${level}` : ''
 }
