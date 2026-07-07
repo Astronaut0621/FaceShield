@@ -3,7 +3,7 @@ from decimal import Decimal
 
 from sqlalchemy.orm import Session
 
-from app.algorithm.postprocess.heatmap import generate_fallback_heatmap
+from app.algorithm.postprocess.heatmap import generate_fallback_heatmap, prepare_heatmap_artifact
 from app.algorithm.preprocess import crop_face_for_detection
 from app.algorithm.predictor import predict_image
 from app.core.config import settings
@@ -59,14 +59,21 @@ class DetectionService:
             prediction = predict_image(crop.crop_path)
             fake_probability = float(prediction["fake_probability"])
             risk_level = RiskPolicy.classify(fake_probability)
-            heatmap_url = prediction.get("heatmap_url") or prediction.get("heatmap_path")
-            if not heatmap_url:
+            heatmap = prepare_heatmap_artifact(
+                prediction.get("heatmap_url")
+                or prediction.get("heatmap_path")
+                or prediction.get("heatmap_image")
+                or prediction.get("overlay_image"),
+                output_dir=settings.HEATMAP_DIR,
+                output_url_prefix="/storage/heatmaps",
+                source_roots=(settings.BASE_DIR, settings.BASE_DIR.parent),
+            )
+            if heatmap is None:
                 heatmap = generate_fallback_heatmap(
                     crop.crop_path,
                     output_dir=settings.HEATMAP_DIR,
                     output_url_prefix="/storage/heatmaps",
                 )
-                heatmap_url = heatmap.heatmap_url
 
             selected_model = self.model_repository.get_by_id(model_id) if model_id else None
             model_name = prediction.get("model_name")
@@ -85,7 +92,7 @@ class DetectionService:
                 risk_level=risk_level.value,
                 frequency_score=Decimal(str(prediction.get("frequency_score", 0))),
                 spatial_score=Decimal(str(prediction.get("spatial_score", 0))),
-                heatmap_url=heatmap_url,
+                heatmap_url=heatmap.heatmap_url,
                 face_crop_url=crop.crop_url,
                 face_detected=crop.face_detected,
                 suggestion=RiskPolicy.suggestion_for(risk_level),

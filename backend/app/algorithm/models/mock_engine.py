@@ -25,6 +25,7 @@ class MockDetectionEngine:
             frequency_score=frequency_score,
             spatial_score=spatial_score,
             heatmap_path=None,
+            heatmap_url=None,
             model_name="FaceShield-MockNet",
             model_version="v0.1",
         )

@@ -152,8 +152,14 @@ def _ensure_development_columns() -> None:
         },
         "detection_result": {
             "user_id": "INTEGER",
+            "frequency_score": "NUMERIC(6, 4)",
+            "spatial_score": "NUMERIC(6, 4)",
+            "heatmap_url": "VARCHAR(500)",
             "face_crop_url": "VARCHAR(500)",
             "face_detected": "BOOLEAN DEFAULT 0 NOT NULL",
+            "suggestion": "TEXT",
+            "model_name": "VARCHAR(100)",
+            "model_version": "VARCHAR(50)",
         },
     }
 

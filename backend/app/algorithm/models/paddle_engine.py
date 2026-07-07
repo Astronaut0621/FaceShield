@@ -109,6 +109,7 @@ class PaddleDetectionEngine:
             frequency_score=round(fake_probability, 4) if model_name in FUSION_MODELS else None,
             spatial_score=round(real_probability if label == "real" else fake_probability, 4),
             heatmap_path=None,
+            heatmap_url=None,
             model_name=algorithm_settings.model_name,
             model_version=algorithm_settings.model_version,
         )

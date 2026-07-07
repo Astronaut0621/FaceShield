@@ -1,4 +1,6 @@
-from sqlalchemy import func, select
+from pathlib import Path
+
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.file_record import FileRecord
@@ -14,6 +16,9 @@ class FileRepository:
             return None
         if user_id is not None and record.user_id != user_id:
             return None
+        if not self._file_exists(record):
+            self._mark_deleted(record)
+            return None
         return record
 
     def list_by_user(
@@ -22,20 +27,23 @@ class FileRepository:
         offset: int = 0,
         limit: int = 20,
     ) -> list[FileRecord]:
-        return list(
+        rows = list(
             self.db.scalars(
                 select(FileRecord)
                 .where(FileRecord.user_id == user_id, FileRecord.is_deleted.is_(False))
                 .order_by(FileRecord.upload_time.desc())
-                .offset(offset)
-                .limit(limit)
             )
         )
+        active_rows = self._filter_existing(rows)
+        return active_rows[offset : offset + limit]
 
     def count_by_user(self, user_id: int) -> int:
-        return self.db.scalar(
-            select(func.count()).select_from(FileRecord).where(FileRecord.user_id == user_id, FileRecord.is_deleted.is_(False))
-        ) or 0
+        rows = list(
+            self.db.scalars(
+                select(FileRecord).where(FileRecord.user_id == user_id, FileRecord.is_deleted.is_(False))
+            )
+        )
+        return len(self._filter_existing(rows))
 
     def create(
         self,
@@ -63,3 +71,26 @@ class FileRepository:
         self.db.commit()
         self.db.refresh(record)
         return record
+
+    def _filter_existing(self, rows: list[FileRecord]) -> list[FileRecord]:
+        active_rows = []
+        missing_rows = []
+        for row in rows:
+            if self._file_exists(row):
+                active_rows.append(row)
+            else:
+                row.is_deleted = True
+                missing_rows.append(row)
+
+        if missing_rows:
+            self.db.commit()
+
+        return active_rows
+
+    @staticmethod
+    def _file_exists(record: FileRecord) -> bool:
+        return bool(record.file_path) and Path(record.file_path).is_file()
+
+    def _mark_deleted(self, record: FileRecord) -> None:
+        record.is_deleted = True
+        self.db.commit()

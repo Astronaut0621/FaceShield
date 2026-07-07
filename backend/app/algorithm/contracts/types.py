@@ -16,6 +16,7 @@ class DetectionOutput:
     frequency_score: float | None
     spatial_score: float | None
     heatmap_path: str | None
+    heatmap_url: str | None
     model_name: str
     model_version: str
 
@@ -28,7 +29,7 @@ class DetectionOutput:
             "frequency_score": self.frequency_score,
             "spatial_score": self.spatial_score,
             "heatmap_path": self.heatmap_path,
+            "heatmap_url": self.heatmap_url,
             "model_name": self.model_name,
             "model_version": self.model_version,
         }
-

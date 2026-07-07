@@ -114,8 +114,8 @@ function onHeatmapError() {
   position: absolute;
   inset: 0;
   margin: auto;
-  opacity: 0.62;
-  mix-blend-mode: screen;
+  opacity: 0.58;
+  mix-blend-mode: normal;
 }
 
 .heatmap-placeholder {

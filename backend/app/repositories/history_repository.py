@@ -1,4 +1,8 @@
-from sqlalchemy import func, select
+from __future__ import annotations
+
+from pathlib import Path
+
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.detection_result import DetectionResult
@@ -32,13 +36,13 @@ class HistoryRepository:
         risk_level: str | None = None,
     ) -> int:
         stmt = (
-            select(func.count())
+            select(FileRecord)
             .select_from(DetectionResult)
             .join(DetectionTask, DetectionTask.id == DetectionResult.task_id)
             .join(FileRecord, FileRecord.id == DetectionResult.file_id)
             .where(*self._filters(user_id=user_id, label=label, risk_level=risk_level))
         )
-        return self.db.scalar(stmt) or 0
+        return len(self._filter_existing_file_records(list(self.db.scalars(stmt))))
 
     def list(
         self,
@@ -58,7 +62,7 @@ class HistoryRepository:
             .offset(offset)
             .limit(limit)
         )
-        return self.db.execute(stmt).all()
+        return self._filter_existing_rows(self.db.execute(stmt).all())
 
     def get_detail(self, task_id: int, user_id: int | None = None):
         filters = [DetectionResult.task_id == task_id, FileRecord.is_deleted.is_(False)]
@@ -69,4 +73,46 @@ class HistoryRepository:
             .join(FileRecord, FileRecord.id == DetectionResult.file_id)
             .where(*filters)
         )
-        return self.db.execute(stmt).first()
+        row = self.db.execute(stmt).first()
+        if row is None:
+            return None
+        return row if self._file_exists(row[1]) else self._mark_missing_and_return_none(row[1])
+
+    def _filter_existing_rows(self, rows):
+        active_rows = []
+        missing_records = []
+        for result, file_record in rows:
+            if self._file_exists(file_record):
+                active_rows.append((result, file_record))
+            else:
+                file_record.is_deleted = True
+                missing_records.append(file_record)
+
+        if missing_records:
+            self.db.commit()
+
+        return active_rows
+
+    def _filter_existing_file_records(self, rows: list[FileRecord]) -> list[FileRecord]:
+        active_rows = []
+        missing_records = []
+        for file_record in rows:
+            if self._file_exists(file_record):
+                active_rows.append(file_record)
+            else:
+                file_record.is_deleted = True
+                missing_records.append(file_record)
+
+        if missing_records:
+            self.db.commit()
+
+        return active_rows
+
+    @staticmethod
+    def _file_exists(file_record: FileRecord) -> bool:
+        return bool(file_record.file_path) and Path(file_record.file_path).is_file()
+
+    def _mark_missing_and_return_none(self, file_record: FileRecord):
+        file_record.is_deleted = True
+        self.db.commit()
+        return None
