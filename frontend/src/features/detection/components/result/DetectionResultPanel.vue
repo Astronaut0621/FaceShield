@@ -30,11 +30,6 @@
       </div>
     </div>
 
-    <div class="score-grid">
-      <ScoreBar label="空域特征分数" :value="result.spatialScore" tone="spatial" />
-      <ScoreBar label="频域特征分数" :value="result.frequencyScore" tone="frequency" />
-    </div>
-
     <p v-if="result.suggestion" class="suggestion">{{ result.suggestion }}</p>
 
     <div class="image-grid">
@@ -76,7 +71,6 @@
 import HeatmapViewer from './HeatmapViewer.vue'
 import ProbabilityGauge from './ProbabilityGauge.vue'
 import RiskBadge from './RiskBadge.vue'
-import ScoreBar from './ScoreBar.vue'
 import { formatDateTime, formatLabel, formatRiskLevel, riskLevelClass } from '@/utils/formatters'
 import { resolveStorageUrl } from '@/utils/storage'
 
@@ -160,11 +154,6 @@ defineProps({
 
 .meta-item strong {
   color: var(--text);
-}
-
-.score-grid {
-  display: grid;
-  gap: 16px;
 }
 
 .suggestion {
