@@ -31,6 +31,7 @@ FaceForensics-master/
 outputs/
 model/outputs/
 model/summary/
+model/cross_domain/
 model/*.tar.gz
 
 # Archives and model checkpoints

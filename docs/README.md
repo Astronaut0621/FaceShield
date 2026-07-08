@@ -10,6 +10,7 @@
 4. [后端与模型联调说明](backend_model_integration.md)：后端加载 Paddle 模型、环境变量、健康检查和故障排查。
 5. [训练论文材料整理](training_paper_notes.md)：论文或答辩中可复用的算法描述和实验表述。
 6. [Word 模板插入映射](word_template_training_insert_map.md)：课程文档写作时的内容映射建议。
+7. [跨域泛化实验方案](cross_domain_evaluation.md)：FaceForensics++ 跨伪造类型和 Celeb-DF v2 跨数据集评估流程。
 
 ## 当前实现边界
 
