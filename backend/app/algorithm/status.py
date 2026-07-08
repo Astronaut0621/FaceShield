@@ -10,7 +10,8 @@ from app.algorithm.config import algorithm_settings
 def get_algorithm_status() -> dict:
     model_path = Path(algorithm_settings.model_path or "")
     config_path = Path(algorithm_settings.model_config_path or "")
-    paddle_available = importlib.util.find_spec("paddle") is not None
+    paddle_status = _get_paddle_status()
+    paddle_available = bool(paddle_status["available"])
     opencv_status = _get_opencv_status()
     opencv_available = bool(opencv_status["available"])
 
@@ -19,7 +20,10 @@ def get_algorithm_status() -> dict:
     if algorithm_settings.backend == "paddle":
         if not paddle_available:
             ready = False
-            warnings.append("PaddlePaddle is not installed.")
+            if paddle_status["error"]:
+                warnings.append(f"PaddlePaddle import failed: {paddle_status['error']}")
+            else:
+                warnings.append("PaddlePaddle is not installed.")
         if not model_path.exists():
             ready = False
             warnings.append(f"Model checkpoint not found: {model_path}")
@@ -41,10 +45,36 @@ def get_algorithm_status() -> dict:
         "model_config_path": str(config_path) if algorithm_settings.model_config_path else None,
         "model_config_exists": config_path.exists() if algorithm_settings.model_config_path else False,
         "paddle_available": paddle_available,
+        "paddle_version": paddle_status["version"],
+        "paddle_error": paddle_status["error"],
         "opencv_available": opencv_available,
         "opencv_version": opencv_status["version"],
         "opencv_haar_available": opencv_status["haar_available"],
         "warnings": warnings,
+    }
+
+
+def _get_paddle_status() -> dict[str, Any]:
+    if importlib.util.find_spec("paddle") is None:
+        return {
+            "available": False,
+            "version": None,
+            "error": None,
+        }
+
+    try:
+        import paddle
+    except Exception as exc:
+        return {
+            "available": False,
+            "version": None,
+            "error": str(exc),
+        }
+
+    return {
+        "available": True,
+        "version": getattr(paddle, "__version__", None),
+        "error": None,
     }
 
 

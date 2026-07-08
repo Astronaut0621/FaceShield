@@ -3,6 +3,7 @@ package com.faceshield.mobile.network
 import com.faceshield.mobile.model.ApiResponse
 import com.faceshield.mobile.model.DetectionResponse
 import com.faceshield.mobile.model.LoginResponse
+import com.faceshield.mobile.model.MobileBootstrapResponse
 import com.faceshield.mobile.model.ModelVersionResponse
 import com.faceshield.mobile.model.RecordsResponse
 import com.faceshield.mobile.model.UserProfileDto
@@ -11,6 +12,9 @@ import retrofit2.Response
 import retrofit2.http.*
 
 interface FaceShieldApi {
+
+    @GET("api/mobile/bootstrap")
+    suspend fun getMobileBootstrap(): Response<ApiResponse<MobileBootstrapResponse>>
 
     @POST("api/auth/login")
     suspend fun login(

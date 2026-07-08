@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api import auth, asset, detect, detection, health, history, model, records, upload
+from app.api import auth, asset, detect, detection, health, history, mobile, model, records, upload
 
 api_router = APIRouter()
 api_router.include_router(health.router)
@@ -12,3 +12,4 @@ api_router.include_router(detection.router)
 api_router.include_router(history.router)
 api_router.include_router(records.router)
 api_router.include_router(model.router)
+api_router.include_router(mobile.router)

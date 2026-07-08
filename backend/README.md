@@ -2,12 +2,20 @@
 
 FaceShield 后端基于 FastAPI 构建，负责登录认证、图片上传、算法推理、结果入库、历史记录查询和静态文件访问。当前后端已经支持 `mock` 与 `paddle` 两种算法后端，默认仍使用 `mock`，便于无模型环境启动；设置环境变量后可加载 `model/deploy/fusion_v2` 中的 PaddlePaddle 权重。
 
+同时为 Android 移动端提供 `/api/mobile/bootstrap` 探活接口，供移动端在登录前验证后端是否可达且就绪。
+
 ## 启动
 
 项目根目录提供 `.env.example`，可复制为 `.env` 后切换 `mock` 或 `paddle` 算法后端。
 
 ```bash
 pip install -r requirements.txt
+python run.py
+```
+
+或直接使用 uvicorn：
+
+```bash
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
@@ -32,6 +40,17 @@ GET http://localhost:8000/api/health
 - PaddlePaddle 是否可用
 - OpenCV 是否可用
 - 当前算法后端是否 ready
+
+## Docker 部署
+
+后端已容器化，可通过 Docker Compose 一键启动，无需手动配置 Python 环境：
+
+```powershell
+cd D:\BigCreate\FaceShield
+.\scripts\docker-local.ps1 up
+```
+
+详见 [docs/docker-local-deployment.md](../docs/docker-local-deployment.md)。
 
 ## 数据库
 
@@ -109,11 +128,15 @@ backend/storage/paddle_home
 -> 返回前端展示字段
 ```
 
-说明：Paddle 后端会基于 RGB 空域分支最后一层特征图生成 Grad-CAM 热力图；mock 模式或 Grad-CAM 生成失败时，会自动使用 fallback 热力图保证展示链路不断。
+说明：
+- CPU 密集型检测（模型推理、热力图生成）通过 `asyncio.to_thread` 放入线程池执行，不会阻塞 FastAPI 事件循环。
+- 文件列表和历史记录查询使用 SQL 级别 `OFFSET/LIMIT` 和 `COUNT`，避免全量加载。
+- Paddle 后端会基于 RGB 空域分支最后一层特征图生成 Grad-CAM 热力图；mock 模式或 Grad-CAM 生成失败时，会自动使用 fallback 热力图保证展示链路不断。
 
 ## 主要接口
 
 - `GET /api/health`
+- `GET /api/mobile/bootstrap` — 移动端探活
 - `POST /api/auth/login`
 - `POST /api/auth/logout`
 - `GET /api/auth/me`
@@ -130,7 +153,7 @@ backend/storage/paddle_home
 - `GET /api/history/list`
 - `GET /api/history/{task_id}`
 
-除 `/api/health` 和 `/api/auth/login` 外，业务接口需要：
+除 `/api/health`、`/api/mobile/bootstrap` 和 `/api/auth/login` 外，业务接口需要：
 
 ```text
 Authorization: Bearer <access_token>

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models.detection_result import DetectionResult
@@ -36,13 +36,13 @@ class HistoryRepository:
         risk_level: str | None = None,
     ) -> int:
         stmt = (
-            select(FileRecord)
+            select(func.count())
             .select_from(DetectionResult)
             .join(DetectionTask, DetectionTask.id == DetectionResult.task_id)
             .join(FileRecord, FileRecord.id == DetectionResult.file_id)
             .where(*self._filters(user_id=user_id, label=label, risk_level=risk_level))
         )
-        return len(self._filter_existing_file_records(list(self.db.scalars(stmt))))
+        return self.db.scalar(stmt) or 0
 
     def list(
         self,
@@ -59,9 +59,10 @@ class HistoryRepository:
             .join(FileRecord, FileRecord.id == DetectionResult.file_id)
             .where(*self._filters(user_id=user_id, label=label, risk_level=risk_level))
             .order_by(DetectionResult.created_at.desc(), DetectionResult.id.desc())
+            .offset(offset)
+            .limit(limit)
         )
-        rows = self._filter_existing_rows(self.db.execute(stmt).all())
-        return rows[offset : offset + limit]
+        return self._filter_existing_rows(self.db.execute(stmt).all())
 
     def get_detail(self, task_id: int, user_id: int | None = None):
         filters = [DetectionResult.task_id == task_id, FileRecord.is_deleted.is_(False)]

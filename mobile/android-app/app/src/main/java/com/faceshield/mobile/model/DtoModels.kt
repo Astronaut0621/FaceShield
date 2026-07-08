@@ -22,6 +22,43 @@ data class UserProfileDto(
     val lastLoginAt: String?
 )
 
+data class MobileBootstrapResponse(
+    val status: String,
+    @SerializedName("api_version")
+    val apiVersion: String?,
+    @SerializedName("server_time")
+    val serverTime: String?,
+    val endpoints: MobileEndpointInfo?,
+    @SerializedName("upload_policy")
+    val uploadPolicy: MobileUploadPolicy?,
+    val algorithm: MobileAlgorithmInfo?
+)
+
+data class MobileEndpointInfo(
+    val login: String?,
+    val detect: String?,
+    val records: String?,
+    @SerializedName("model_version")
+    val modelVersion: String?
+)
+
+data class MobileUploadPolicy(
+    @SerializedName("max_upload_size")
+    val maxUploadSize: Long?,
+    @SerializedName("allowed_extensions")
+    val allowedExtensions: List<String>?
+)
+
+data class MobileAlgorithmInfo(
+    val backend: String?,
+    val ready: Boolean?,
+    @SerializedName("model_name")
+    val modelName: String?,
+    @SerializedName("model_version")
+    val modelVersion: String?,
+    val warnings: List<String>?
+)
+
 data class DetectionResponse(
     @SerializedName("task_id")
     val taskId: Int,
