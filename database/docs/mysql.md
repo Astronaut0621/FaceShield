@@ -106,3 +106,181 @@ mysql -u faceshield_user -p faceshield_db < backup_20260708.sql
 配置文件管理：真实密码放在 .env 文件中，.gitignore 排除，不提交至 GitHub
 
 远程访问：仅开发环境开放远程连接（faceshield_user@%），生产环境应限制为 localhost
+
+markdown
+# FaceShield 数据字典
+
+**数据库名称**：faceshield_db  
+**数据库类型**：MySQL 8.4.10 LTS  
+**字符集**：utf8mb4  
+**最后更新**：2026年7月8日
+
+
+## 一、E-R图
+┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
+│ users │ │ file_record │ │ detection_task │ │ detection_result│
+├─────────────────┤ ├─────────────────┤ ├─────────────────┤ ├─────────────────┤
+│ id (PK) │◄─────────│ user_id (FK) │ │ id (PK) │ │ id (PK) │
+│ username │ │ id (PK) │◄─────────│ file_id (FK) │ │ user_id (FK) │
+│ password_hash │ │ original_filename│ │ user_id (FK) │◄─────────│ task_id (FK) │
+│ display_name │ │ stored_filename │ │ task_status │ │ file_id (FK) │
+│ status │ │ image_hash │ │ task_type │ │ label │
+│ created_at │ │ file_path │ │ error_message │ │ fake_probability│
+│ last_login_at │ │ file_url │ │ created_at │ │ confidence │
+└─────────────────┘ │ file_type │ │ started_at │ │ risk_level │
+│ file_size │ │ finished_at │ │ frequency_score │
+│ upload_time │ └─────────────────┘ │ spatial_score │
+│ is_deleted │ │ heatmap_url │
+└─────────────────┘ │ face_crop_url │
+│ face_detected │
+│ suggestion │
+│ model_name │
+│ model_version │
+│ created_at │
+└─────────────────┘
+
+┌─────────────────┐
+│ model_version │
+├─────────────────┤
+│ id (PK) │
+│ model_name │
+│ version │
+│ description │
+│ model_path │
+│ is_active │
+│ created_at │
+└─────────────────┘
+
+关系说明：
+users 1 ──┐── N file_record (一个用户可上传多个文件)
+users 1 ──┴── N detection_result (一个用户可拥有多条检测结果)
+file_record 1 ── N detection_task (一个文件可对应多个检测任务)
+detection_task 1 ── 1 detection_result (一个任务只有一个检测结果)
+
+text
+
+
+## 二、表结构详细说明
+
+### 2.1 表名：users（用户表）
+
+**业务含义**：存储系统用户的基本信息，用于身份认证和权限管理。
+
+| 字段名 | 类型 | 允许空 | 默认值 | 约束 | 说明 |
+|--------|------|--------|--------|------|------|
+| id | INT | 否 | AUTO_INCREMENT | PRIMARY KEY | 用户唯一标识 |
+| username | VARCHAR(100) | 否 | 无 | UNIQUE | 用户名，用于登录 |
+| password_hash | VARCHAR(255) | 否 | 无 | | 密码哈希值（bcrypt加密） |
+| display_name | VARCHAR(100) | 是 | NULL | | 用户显示昵称 |
+| status | VARCHAR(50) | 是 | 'active' | | 账户状态：active/disabled |
+| created_at | TIMESTAMP | 是 | CURRENT_TIMESTAMP | | 注册时间 |
+| last_login_at | TIMESTAMP | 是 | NULL | | 最后登录时间 |
+
+### 2.2 表名：file_record（文件记录表）
+
+**业务含义**：记录用户上传的所有文件信息，是检测任务的数据源头。
+
+| 字段名 | 类型 | 允许空 | 默认值 | 约束 | 说明 |
+|--------|------|--------|--------|------|------|
+| id | INT | 否 | AUTO_INCREMENT | PRIMARY KEY | 文件唯一标识 |
+| user_id | INT | 是 | NULL | FOREIGN KEY | 上传者ID，关联users.id |
+| original_filename | VARCHAR(255) | 否 | 无 | | 用户上传时的原始文件名 |
+| stored_filename | VARCHAR(255) | 否 | 无 | UNIQUE | 系统生成的唯一存储文件名 |
+| image_hash | VARCHAR(128) | 是 | NULL | | 图片SHA-256哈希值 |
+| file_path | VARCHAR(500) | 否 | 无 | | 文件在服务器上的存储路径 |
+| file_url | VARCHAR(500) | 是 | NULL | | 文件访问URL |
+| file_type | VARCHAR(50) | 是 | NULL | | 文件类型：jpg/png |
+| file_size | BIGINT | 是 | NULL | | 文件大小（字节） |
+| upload_time | TIMESTAMP | 是 | CURRENT_TIMESTAMP | | 上传时间 |
+| is_deleted | BOOLEAN | 是 | FALSE | | 软删除标记 |
+
+### 2.3 表名：detection_task（检测任务表）
+
+**业务含义**：跟踪每次检测任务的执行状态和进度。
+
+| 字段名 | 类型 | 允许空 | 默认值 | 约束 | 说明 |
+|--------|------|--------|--------|------|------|
+| id | INT | 否 | AUTO_INCREMENT | PRIMARY KEY | 任务唯一标识 |
+| user_id | INT | 是 | NULL | FOREIGN KEY | 发起用户ID，关联users.id |
+| file_id | INT | 否 | 无 | FOREIGN KEY | 关联文件ID，关联file_record.id |
+| task_status | VARCHAR(50) | 是 | 'pending' | | pending/running/completed/failed |
+| task_type | VARCHAR(50) | 是 | 'image' | | 任务类型：image |
+| error_message | TEXT | 是 | NULL | | 任务失败时的错误信息 |
+| created_at | TIMESTAMP | 是 | CURRENT_TIMESTAMP | | 任务创建时间 |
+| started_at | TIMESTAMP | 是 | NULL | | 任务开始处理时间 |
+| finished_at | TIMESTAMP | 是 | NULL | | 任务完成时间 |
+
+### 2.4 表名：detection_result（检测结果表）
+
+**业务含义**：存储模型检测的完整结果，是系统的核心数据产出表。
+
+| 字段名 | 类型 | 允许空 | 默认值 | 约束 | 说明 |
+|--------|------|--------|--------|------|------|
+| id | INT | 否 | AUTO_INCREMENT | PRIMARY KEY | 结果唯一标识 |
+| user_id | INT | 是 | NULL | FOREIGN KEY | 用户ID，关联users.id |
+| task_id | INT | 否 | 无 | FOREIGN KEY | 关联任务ID，关联detection_task.id |
+| file_id | INT | 否 | 无 | FOREIGN KEY | 关联文件ID，关联file_record.id |
+| label | VARCHAR(50) | 是 | NULL | | real（真实）/ fake（伪造） |
+| fake_probability | DECIMAL(6,4) | 是 | NULL | | 伪造概率（0~1） |
+| confidence | DECIMAL(6,4) | 是 | NULL | | 综合置信度（0~1） |
+| risk_level | VARCHAR(50) | 是 | NULL | | low / medium / high |
+| frequency_score | DECIMAL(6,4) | 是 | NULL | | 频域分支得分 |
+| spatial_score | DECIMAL(6,4) | 是 | NULL | | 空域分支得分 |
+| heatmap_url | VARCHAR(500) | 是 | NULL | | Grad-CAM热力图访问URL |
+| face_crop_url | VARCHAR(500) | 是 | NULL | | 裁剪人脸图URL |
+| face_detected | BOOLEAN | 是 | FALSE | | 是否检测到人脸 |
+| suggestion | TEXT | 是 | NULL | | 检测建议文本 |
+| model_name | VARCHAR(100) | 是 | NULL | | 使用的模型名称 |
+| model_version | VARCHAR(50) | 是 | NULL | | 使用的模型版本号 |
+| created_at | TIMESTAMP | 是 | CURRENT_TIMESTAMP | | 检测时间 |
+
+### 2.5 表名：model_version（模型版本表）
+
+**业务含义**：管理检测模型的版本信息，支持模型迭代和溯源。
+
+| 字段名 | 类型 | 允许空 | 默认值 | 约束 | 说明 |
+|--------|------|--------|--------|------|------|
+| id | INT | 否 | AUTO_INCREMENT | PRIMARY KEY | 版本唯一标识 |
+| model_name | VARCHAR(100) | 否 | 无 | | 模型名称 |
+| version | VARCHAR(50) | 否 | 无 | | 版本号 |
+| description | TEXT | 是 | NULL | | 版本描述 |
+| model_path | VARCHAR(500) | 是 | NULL | | 模型文件存储路径 |
+| is_active | BOOLEAN | 是 | FALSE | | 是否为当前激活版本 |
+| created_at | TIMESTAMP | 是 | CURRENT_TIMESTAMP | | 发布时间 |
+
+
+## 三、视图：detection_records
+
+**业务含义**：将 detection_result、file_record、detection_task 三张表关联，提供统一的历史记录查询接口。
+
+| 字段名 | 来源 | 说明 |
+|--------|------|------|
+| id | detection_task.id | 任务ID |
+| user_id | detection_result.user_id | 用户ID |
+| image_hash | file_record.image_hash | 图片哈希值 |
+| original_image_path | file_record.file_path | 原图存储路径 |
+| face_crop_path | detection_result.face_crop_url | 裁剪人脸图URL |
+| heatmap_path | detection_result.heatmap_url | 热力图URL |
+| prediction | detection_result.label | 检测标签（real/fake） |
+| fake_probability | detection_result.fake_probability | 伪造概率 |
+| risk_level | detection_result.risk_level | 风险等级 |
+| model_version | detection_result.model_version | 模型版本 |
+| face_detected | detection_result.face_detected | 是否检测到人脸 |
+| created_at | detection_result.created_at | 检测时间 |
+
+
+## 四、存储策略说明
+
+### 为什么图片/热力图/模型文件不直接存入 MySQL？
+
+| 方式 | 优点 | 缺点 |
+|------|------|------|
+| **文件系统存路径（本方案）** | 读取快、备份简单、节省数据库空间 | 需管理文件与记录的一致性 |
+| **MySQL BLOB 直接存储** | 数据一体化、易于迁移 | 数据库膨胀、备份慢、影响查询性能 |
+
+**选择存路径的原因**：
+1. 大文件会显著降低数据库查询性能
+2. 数据库存储成本远高于文件存储
+3. 备份恢复更灵活（元数据与文件分开）
+4. 图片可通过 Web 服务器直接访问，无需经过后端
+5. 未来可平滑迁移至 OSS 对象存储
