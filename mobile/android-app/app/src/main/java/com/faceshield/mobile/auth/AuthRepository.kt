@@ -32,6 +32,15 @@ class AuthRepository(
         }
 
         return try {
+            val bootstrapResponse = api.getMobileBootstrap()
+            if (!bootstrapResponse.isSuccessful) {
+                return LoginResult.SERVER_UNREACHABLE
+            }
+            val bootstrap = bootstrapResponse.body()?.data
+            if (bootstrap?.status != "ok") {
+                return LoginResult.BACKEND_UNHEALTHY
+            }
+
             val response = api.login(LoginRequest(username, password))
             if (response.isSuccessful) {
                 val body = response.body()

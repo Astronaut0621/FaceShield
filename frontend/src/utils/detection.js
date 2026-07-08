@@ -11,8 +11,6 @@ export function normalizeDetectionResult(raw) {
     fakeProbability: raw.fake_probability ?? null,
     confidence: raw.confidence ?? null,
     riskLevel: raw.risk_level ?? null,
-    frequencyScore: raw.frequency_score ?? null,
-    spatialScore: raw.spatial_score ?? null,
     heatmapUrl: raw.heatmap_url ?? null,
     faceCropUrl: raw.face_crop_url ?? null,
     faceDetected: raw.face_detected ?? null,

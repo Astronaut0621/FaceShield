@@ -14,6 +14,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,18 +30,26 @@ import com.faceshield.mobile.FaceShieldApp
 import com.faceshield.mobile.auth.LoginUseCase
 import com.faceshield.mobile.model.LoginResult
 import com.faceshield.mobile.network.ServerUrl
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(onLoginSuccess: () -> Unit) {
-    var username by remember { mutableStateOf("demo") }
-    var password by remember { mutableStateOf("demo123456") }
-    var serverUrl by remember { mutableStateOf("http://10.0.2.2:8000/") }
+    var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var serverUrl by remember { mutableStateOf(ServerUrl.DEFAULT) }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        val app = context.applicationContext as FaceShieldApp
+        serverUrl = app.authTokenStore.serverUrl.firstOrNull().orEmpty().ifBlank {
+            ServerUrl.DEFAULT
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -131,6 +140,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                         LoginResult.INVALID_CREDENTIALS -> errorMessage = "Invalid username or password."
                         LoginResult.NETWORK_ERROR -> errorMessage = "Network error. Check your connection."
                         LoginResult.SERVER_UNREACHABLE -> errorMessage = "Cannot reach the backend server."
+                        LoginResult.BACKEND_UNHEALTHY -> errorMessage = "Backend is reachable but not ready for mobile login."
                         LoginResult.INVALID_SERVER_URL -> errorMessage = "Backend URL must be a valid http:// or https:// URL."
                     }
                 }

@@ -1,0 +1,46 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: ${FACESHIELD_CONTAINER_NAME:-faceshield-backend}
+    init: true
+    ports:
+      - "0.0.0.0:${FACESHIELD_BACKEND_PORT:-8000}:8000"
+    environment:
+      DATABASE_URL: sqlite:////app/data/faceshield.db
+      DEMO_USERNAME: demo
+      DEMO_PASSWORD: demo123456
+      DEMO_DISPLAY_NAME: Demo User
+      SECRET_KEY: faceshield-demo-key-2026
+      ACCESS_TOKEN_EXPIRE_SECONDS: "604800"
+      CORS_ORIGINS: "*"
+      FACESHIELD_ALGORITHM_BACKEND: mock
+      FACESHIELD_MODEL_NAME: FaceShield-FusionV2
+      FACESHIELD_MODEL_VERSION: fusion_v2-202607
+    volumes:
+      - faceshield-data:/app/data
+      - faceshield-storage:/app/storage
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/mobile/bootstrap', timeout=5).read()",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    restart: unless-stopped
+    stop_grace_period: 20s
+
+volumes:
+  faceshield-data:
+  faceshield-storage:

@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.media.Image
 import android.media.ImageReader
-import android.os.Build
 import com.faceshield.mobile.model.CaptureResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -65,11 +64,7 @@ class ScreenCaptureEngine(
                     CaptureResult.EmptyFrame
                 }
             } finally {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                    mediaProjectionManager.release()
-                } else {
-                    mediaProjectionManager.releaseVirtualDisplay()
-                }
+                mediaProjectionManager.releaseVirtualDisplay()
             }
         }
 

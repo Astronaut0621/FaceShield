@@ -69,9 +69,9 @@ class RetrofitApiClient(private val context: Context) {
         }
 
         val clientBuilder = OkHttpClient.Builder()
-            .connectTimeout(15, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(120, TimeUnit.SECONDS)
+            .writeTimeout(120, TimeUnit.SECONDS)
             .addInterceptor(AuthInterceptor(tokenStore))
             .addInterceptor(loggingInterceptor)
 

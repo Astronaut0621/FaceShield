@@ -11,6 +11,7 @@ from app.services.detection_service import DetectionService
 from app.services.detection_workflow_service import DetectionWorkflowService
 from app.services.file_service import FileService
 from app.services.history_service import HistoryService
+from app.services.mobile_connectivity_service import MobileConnectivityService
 from app.services.model_service import ModelService
 
 bearer_scheme = HTTPBearer(auto_error=False)
@@ -56,3 +57,7 @@ def get_history_service(db: Session = Depends(get_db)) -> HistoryService:
 
 def get_model_service(db: Session = Depends(get_db)) -> ModelService:
     return ModelService(db)
+
+
+def get_mobile_connectivity_service() -> MobileConnectivityService:
+    return MobileConnectivityService()

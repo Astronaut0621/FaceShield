@@ -26,7 +26,7 @@ class Settings:
 
     MAX_UPLOAD_SIZE = int(os.getenv("MAX_UPLOAD_SIZE", str(10 * 1024 * 1024)))
     ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png"}
-    SECRET_KEY = os.getenv("SECRET_KEY", "faceshield-dev-secret-change-me")
+    SECRET_KEY = os.getenv("SECRET_KEY", "faceshield-demo-key-2026")
     ACCESS_TOKEN_EXPIRE_SECONDS = int(os.getenv("ACCESS_TOKEN_EXPIRE_SECONDS", str(7 * 24 * 60 * 60)))
     DEMO_USERNAME = os.getenv("DEMO_USERNAME", "demo")
     DEMO_PASSWORD = os.getenv("DEMO_PASSWORD", "demo123456")

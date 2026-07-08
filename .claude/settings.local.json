@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find D:\\\\\\\\BigCreate\\\\\\\\FaceShield -maxdepth 1 -not -path '*/node_modules/*' -not -path '*/.git/*')",
+      "Bash(find D:\\\\\\\\BigCreate\\\\\\\\FaceShield\\\\\\\\backend -type f -not -path '*/node_modules/*' -not -path '*/.git/*' -not -path '*/__pycache__/*' -not -path '*/storage/uploads/*.png')",
+      "Bash(find D:\\\\\\\\BigCreate\\\\\\\\FaceShield\\\\\\\\mobile -type f -not -path '*/node_modules/*' -not -path '*/.git/*' -not -path '*/build/*' -not -path '*/.gradle/*')",
+      "Bash(find D:\\\\\\\\BigCreate\\\\\\\\FaceShield\\\\\\\\scripts -type f)",
+      "Bash(find D:\\\\\\\\BigCreate\\\\\\\\FaceShield -maxdepth 1 -type f -iname 'Dockerfile*' -o -maxdepth 1 -type f -iname 'docker-compose*' -o -maxdepth 1 -type f -iname '.dockerignore' -o -maxdepth 1 -type f -iname '.gitignore' -o -maxdepth 1 -type f -iname '*.yml' -o -maxdepth 1 -type f -iname '*.yaml' -o -maxdepth 1 -type f -iname '*.md' -o -maxdepth 1 -type f -iname '*.txt' -o -maxdepth 1 -type f -iname '*.toml' -o -maxdepth 1 -type f -iname '*.cfg')",
+      "Bash(find D:\\\\\\\\BigCreate\\\\\\\\FaceShield\\\\\\\\frontend -maxdepth 1 -type f)"
+    ]
+  }
+}

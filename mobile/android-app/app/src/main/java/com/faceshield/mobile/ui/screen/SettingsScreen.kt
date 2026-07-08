@@ -149,7 +149,11 @@ fun SettingsScreen(onBack: () -> Unit) {
                     showLogoutDialog = false
                     coroutineScope.launch {
                         runCatching { app.authRepository.logout() }
-                        logoutSuccess = true
+                            .onSuccess { logoutSuccess = true }
+                            .onFailure {
+                                isStatusError = true
+                                statusMessage = "Sign out failed, please try again."
+                            }
                     }
                 }) {
                     Text("Confirm", color = MaterialTheme.colorScheme.error)

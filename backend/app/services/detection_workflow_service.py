@@ -1,3 +1,5 @@
+import asyncio
+
 from fastapi import UploadFile
 from sqlalchemy.orm import Session
 
@@ -25,9 +27,10 @@ class DetectionWorkflowService:
         model_id: int | None = None,
     ) -> DetectionWorkflowResult:
         file_record = await self.file_service.save_upload_file(file, user_id=user_id)
-        detection_result = self.detection_service.start_detection(
+        detection_result = await asyncio.to_thread(
+            self.detection_service.start_detection,
             file_record.id,
-            user_id=user_id,
-            model_id=model_id,
+            user_id,
+            model_id,
         )
         return DetectionWorkflowResult(file_record=file_record, detection_result=detection_result)
