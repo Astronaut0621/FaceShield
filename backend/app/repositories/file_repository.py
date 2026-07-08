@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models.file_record import FileRecord
@@ -27,23 +27,23 @@ class FileRepository:
         offset: int = 0,
         limit: int = 20,
     ) -> list[FileRecord]:
-        rows = list(
-            self.db.scalars(
-                select(FileRecord)
-                .where(FileRecord.user_id == user_id, FileRecord.is_deleted.is_(False))
-                .order_by(FileRecord.upload_time.desc())
-            )
+        stmt = (
+            select(FileRecord)
+            .where(FileRecord.user_id == user_id, FileRecord.is_deleted.is_(False))
+            .order_by(FileRecord.upload_time.desc())
+            .offset(offset)
+            .limit(limit)
         )
-        active_rows = self._filter_existing(rows)
-        return active_rows[offset : offset + limit]
+        rows = list(self.db.scalars(stmt))
+        return self._filter_existing(rows)
 
     def count_by_user(self, user_id: int) -> int:
-        rows = list(
-            self.db.scalars(
-                select(FileRecord).where(FileRecord.user_id == user_id, FileRecord.is_deleted.is_(False))
-            )
+        stmt = (
+            select(func.count())
+            .select_from(FileRecord)
+            .where(FileRecord.user_id == user_id, FileRecord.is_deleted.is_(False))
         )
-        return len(self._filter_existing(rows))
+        return self.db.scalar(stmt) or 0
 
     def create(
         self,

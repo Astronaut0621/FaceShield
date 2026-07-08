@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models.detection_result import DetectionResult
@@ -36,13 +36,13 @@ class HistoryRepository:
         risk_level: str | None = None,
     ) -> int:
         stmt = (
-            select(FileRecord)
+            select(func.count())
             .select_from(DetectionResult)
             .join(DetectionTask, DetectionTask.id == DetectionResult.task_id)
             .join(FileRecord, FileRecord.id == DetectionResult.file_id)
             .where(*self._filters(user_id=user_id, label=label, risk_level=risk_level))
         )
-        return len(self._filter_existing_file_records(list(self.db.scalars(stmt))))
+        return self.db.scalar(stmt) or 0
 
     def list(
         self,
