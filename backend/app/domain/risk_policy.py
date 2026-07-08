@@ -6,9 +6,9 @@ class RiskPolicy:
     HIGH_THRESHOLD = 0.8
 
     SUGGESTIONS = {
-        RiskLevel.LOW: "No obvious forgery risk was found. Use the result as a reference only.",
-        RiskLevel.MEDIUM: "The image has a moderate forgery risk. Review the source and context before trusting it.",
-        RiskLevel.HIGH: "The image has a high forgery risk. Treat it cautiously in identity or fraud-sensitive scenarios.",
+        RiskLevel.LOW: "未发现明显伪造风险，仅供参考。",
+        RiskLevel.MEDIUM: "该图片存在中等伪造风险，请核实来源与上下文后再采信。",
+        RiskLevel.HIGH: "该图片存在较高伪造风险，在身份核验或涉诈场景中请谨慎处理。",
     }
 
     @classmethod
