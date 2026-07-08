@@ -284,3 +284,116 @@ text
 3. 备份恢复更灵活（元数据与文件分开）
 4. 图片可通过 Web 服务器直接访问，无需经过后端
 5. 未来可平滑迁移至 OSS 对象存储
+
+markdown
+# FaceShield 数据库设计文档
+
+
+
+## 一、设计概述
+
+### 1.1 设计目标
+
+- 完整存储用户上传的截屏图片元数据
+- 追踪每次检测任务的执行状态
+- 存储频域-空域融合模型的完整检测结果
+- 支持历史记录查询与统计分析
+- 保障用户数据隔离与安全性
+
+### 1.2 设计原则
+
+1. **第三范式（3NF）** ：消除数据冗余，字段依赖主键
+2. **外键关联**：通过外键建立表间关系，保证数据一致性
+3. **索引优化**：对高频查询字段建立索引，提升查询性能
+4. **数据隔离**：所有查询带 `user_id` 条件，防止越权访问
+5. **可扩展性**：预留字段支持未来功能扩展
+
+
+## 二、表结构总览
+
+| 表名 | 说明 | 记录数（演示） |
+|------|------|---------------|
+| users | 用户账户信息 | 1 |
+| file_record | 上传文件记录 | 2 |
+| detection_task | 检测任务状态 | 2 |
+| detection_result | 检测结果详情 | 2 |
+| model_version | 模型版本管理 | 1 |
+| detection_records（视图） | 检测记录联表查询 | 2 |
+
+
+## 三、关系说明
+
+### 3.1 外键依赖链
+users.id
+↓
+file_record.user_id (一个用户上传多个文件)
+↓
+detection_task.file_id (一个文件对应多个检测任务)
+↓
+detection_result.task_id (一个任务对应一个检测结果)
+
+text
+
+### 3.2 删除策略
+
+| 操作 | 策略 |
+|------|------|
+| 删除用户 | 软删除（status='disabled'）或级联删除关联数据 |
+| 删除文件 | `is_deleted` 软删除标记，不物理删除文件记录 |
+| 删除检测任务 | 保留结果，仅标记任务状态为 failed |
+
+
+## 四、索引策略
+
+| 表名 | 索引字段 | 用途 |
+|------|---------|------|
+| users | username | 加速登录查询 |
+| file_record | user_id | 加速按用户查询文件 |
+| file_record | image_hash | 加速去重校验 |
+| file_record | stored_filename | 保证唯一性 |
+| detection_task | user_id | 加速按用户查询任务 |
+| detection_task | file_id | 加速按文件查询任务 |
+| detection_task | task_status | 加速按状态筛选任务 |
+| detection_result | user_id | 加速按用户查询结果 |
+| detection_result | task_id | 加速按任务查询结果 |
+| detection_result | created_at | 加速按时间排序查询 |
+| model_version | model_name, version | 加速按名称/版本查询 |
+
+
+## 五、存储策略
+
+| 数据类型 | 存储方式 | 存储位置 | 数据库存储内容 |
+|---------|---------|---------|---------------|
+| 用户上传图片 | 文件系统 | `/uploads/images/{YYYY-MM-DD}/` | 文件路径 + 哈希值 |
+| 裁剪人脸图 | 文件系统 | `/uploads/crops/{YYYY-MM-DD}/` | URL |
+| Grad-CAM热力图 | 文件系统 | `/uploads/heatmaps/{YYYY-MM-DD}/` | URL |
+| 模型权重文件 | 文件系统 | `/models/{version}/` | 文件路径 |
+| 用户信息 | 数据库 | MySQL | 完整记录 |
+| 检测结果 | 数据库 | MySQL | 完整记录 |
+
+
+## 六、备份与恢复
+
+### 6.1 备份策略
+
+| 策略 | 说明 |
+|------|------|
+| 备份频率 | 每日凌晨2:00自动备份 |
+| 保留周期 | 保留最近7天备份 |
+| 备份内容 | 完整数据库（含表结构 + 数据） |
+| 备份工具 | mysqldump |
+
+### 6.2 备份命令
+
+```bash
+mysqldump -u faceshield_user -p faceshield_db > backup_$(date +%Y%m%d).sql
+6.3 恢复命令
+bash
+mysql -u faceshield_user -p faceshield_db < backup_20260708.sql
+七、安全设计
+安全措施	说明
+密码加密	password_hash 使用 bcrypt 加密
+数据隔离	所有查询必须带 user_id 条件
+非 root 账号	应用使用 faceshield_user 连接
+配置文件	.env 存放密码，不提交 GitHub
+HTTPS 传输	图片上传使用 HTTPS 加密
