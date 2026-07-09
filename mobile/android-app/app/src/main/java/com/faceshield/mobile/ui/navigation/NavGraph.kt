@@ -8,14 +8,12 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.faceshield.mobile.ui.screen.HomeScreen
 import com.faceshield.mobile.ui.screen.LoginScreen
-import com.faceshield.mobile.ui.screen.PermissionGuideScreen
 import com.faceshield.mobile.ui.screen.ResultDetailScreen
 import com.faceshield.mobile.ui.screen.SettingsScreen
 import com.faceshield.mobile.ui.screen.RecordListScreen
 
 object Routes {
     const val LOGIN = "/login"
-    const val PERMISSIONS = "/permissions"
     const val HOME = "/home"
     const val RESULT_DETAIL = "/result/{taskId}"
     const val SETTINGS = "/settings"
@@ -31,18 +29,8 @@ fun NavGraph(onRequestMediaProjection: () -> Unit = {}) {
         composable(Routes.LOGIN) {
             LoginScreen(
                 onLoginSuccess = {
-                    navController.navigate(Routes.PERMISSIONS) {
-                        popUpTo(Routes.LOGIN) { inclusive = true }
-                    }
-                }
-            )
-        }
-
-        composable(Routes.PERMISSIONS) {
-            PermissionGuideScreen(
-                onAllPermissionsGranted = {
                     navController.navigate(Routes.HOME) {
-                        popUpTo(Routes.PERMISSIONS) { inclusive = true }
+                        popUpTo(Routes.LOGIN) { inclusive = true }
                     }
                 }
             )

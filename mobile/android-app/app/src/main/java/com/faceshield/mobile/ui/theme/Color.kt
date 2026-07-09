@@ -15,3 +15,6 @@ val RiskLow = Color(0xFF4CAF50)
 val RiskMedium = Color(0xFFFF9800)
 val RiskHigh = Color(0xFFF44336)
 val RiskError = Color(0xFF9E9E9E)
+
+val DecorativePink = Color(0xFFF48FB1)
+val DecorativeLightPink = Color(0xFFFCE4EC)

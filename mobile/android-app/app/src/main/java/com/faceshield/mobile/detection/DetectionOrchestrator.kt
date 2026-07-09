@@ -50,14 +50,14 @@ class DetectionOrchestrator(
                         }
 
                         is NetworkResult.Exception -> {
-                            emit(DetectionState.Failure("Detection failed. Please try again."))
+                            emit(DetectionState.Failure("检测失败，请重试"))
                         }
                     }
                     captureResult.file.delete()
                 }
 
-                CaptureResult.EmptyFrame -> emit(DetectionState.Failure("Current screen could not be captured."))
-                CaptureResult.BlockedBySystem -> emit(DetectionState.Failure("Capture is blocked by the system."))
+                CaptureResult.EmptyFrame -> emit(DetectionState.Failure("当前屏幕无法截取"))
+                CaptureResult.BlockedBySystem -> emit(DetectionState.Failure("系统拦截了截屏操作"))
                 CaptureResult.NotAuthorized,
                 CaptureResult.ProjectionSessionLost -> emit(DetectionState.CaptureAuthRequired)
             }

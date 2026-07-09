@@ -54,13 +54,13 @@ fun RecordListScreen(
         val app = context.applicationContext as FaceShieldApp
         val serverUrl = app.authTokenStore.serverUrl.firstOrNull().orEmpty()
         if (serverUrl.isBlank()) {
-            errorMessage = "Backend URL is not configured."
+            errorMessage = "未配置后端地址"
             isLoading = false
             return@LaunchedEffect
         }
         val normalizedServerUrl = ServerUrl.normalizeOrNull(serverUrl)
         if (normalizedServerUrl == null) {
-            errorMessage = "Backend URL is invalid. Update it in Settings."
+            errorMessage = "后端地址无效，请在设置中更新"
             isLoading = false
             return@LaunchedEffect
         }
@@ -68,7 +68,7 @@ fun RecordListScreen(
         when (val result = DetectionRepository(app.getApi(normalizedServerUrl)).getRecords(1, 50)) {
             is NetworkResult.Success -> records = result.data.items
             is NetworkResult.Error -> errorMessage = result.message
-            is NetworkResult.Exception -> errorMessage = "Network error."
+            is NetworkResult.Exception -> errorMessage = "网络错误"
         }
         isLoading = false
     }
@@ -76,9 +76,9 @@ fun RecordListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Records") },
+                title = { Text("检测记录") },
                 navigationIcon = {
-                    TextButton(onClick = onBack) { Text("Back") }
+                    TextButton(onClick = onBack) { Text("返回") }
                 }
             )
         }
@@ -89,12 +89,12 @@ fun RecordListScreen(
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(errorMessage.orEmpty(), color = MaterialTheme.colorScheme.error)
                     Spacer(modifier = Modifier.height(8.dp))
-                    TextButton(onClick = onBack) { Text("Back") }
+                    TextButton(onClick = onBack) { Text("返回") }
                 }
             }
             records.isEmpty() -> CenterBox(padding) {
                 Text(
-                    text = "No detection records.",
+                    text = "暂无检测记录",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -144,12 +144,12 @@ private fun RecordItem(record: DetectionResponse, onClick: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text("Detection #${record.taskId}", style = MaterialTheme.typography.titleMedium)
+                Text("检测 #${record.taskId}", style = MaterialTheme.typography.titleMedium)
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(record.label ?: record.prediction ?: "unknown", style = MaterialTheme.typography.bodyMedium)
+                Text(record.label ?: record.prediction ?: "未知", style = MaterialTheme.typography.bodyMedium)
                 record.fakeProbability?.let {
                     Text(
-                        "Fake probability ${(it * 100).toInt()}%",
+                        "伪造概率 ${(it * 100).toInt()}%",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

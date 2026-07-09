@@ -1,23 +1,25 @@
 package com.faceshield.mobile.overlay
 
 import android.annotation.SuppressLint
+import android.app.Dialog
 import android.content.Context
 import android.graphics.PixelFormat
+import android.graphics.drawable.GradientDrawable
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.FrameLayout
 import com.faceshield.mobile.model.OverlayState
+import kotlin.math.abs
+import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlin.math.abs
 
 class OverlayView(
     private val context: Context,
@@ -26,13 +28,16 @@ class OverlayView(
     private val onLongClick: () -> Unit
 ) {
 
-    private val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+    companion object {
+        private const val TAG = "FaceShieldOverlayView"
+    }
+
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var collectJob: Job? = null
 
-    private var overlayView: View? = null
+    private var dialog: Dialog? = null
     private var statusIndicator: View? = null
-    private var stateLabel: TextView? = null
+    private var lastState: OverlayState = OverlayState.IDLE
 
     private var initialX = 0
     private var initialY = 0
@@ -41,34 +46,37 @@ class OverlayView(
     private var isDragging = false
     private var downTime = 0L
 
-    private val layoutParams = WindowManager.LayoutParams().apply {
-        width = WindowManager.LayoutParams.WRAP_CONTENT
-        height = WindowManager.LayoutParams.WRAP_CONTENT
-        type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-        flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-        format = PixelFormat.TRANSLUCENT
-        gravity = Gravity.TOP or Gravity.START
-        x = 0
-        y = 300
-    }
+    private val density = context.resources.displayMetrics.density
+    private val indicatorSize = (56 * density).roundToInt()
 
     fun show(): Boolean {
-        if (overlayView != null) return true
+        if (dialog?.isShowing == true) return true
 
-        val nextView = createOverlayView()
-        val added = runCatching {
-            windowManager.addView(nextView, layoutParams)
-        }.isSuccess
-
-        if (!added) {
-            overlayView = null
-            statusIndicator = null
-            stateLabel = null
-            return false
+        val dlg = Dialog(context, android.R.style.Theme_Translucent_NoTitleBar).apply {
+            setCancelable(false)
+            setCanceledOnTouchOutside(false)
+            window?.apply {
+                setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY)
+                addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
+                setLayout(500, 300)
+                setGravity(Gravity.TOP or Gravity.START)
+                attributes.x = 100
+                attributes.y = 200
+                setBackgroundDrawableResource(android.R.color.transparent)
+                setFormat(PixelFormat.TRANSLUCENT)
+            }
         }
 
-        overlayView = nextView
+        dlg.setContentView(createOverlayView())
+
+        dialog = dlg
+        dlg.show()
+
+        // 检查对话框是否真的显示出来了
+        if (!dlg.isShowing) {
+            dialog = null
+            return false
+        }
 
         collectJob = scope.launch {
             stateFlow.collect { state -> updateState(state) }
@@ -77,51 +85,60 @@ class OverlayView(
     }
 
     fun hide() {
-        overlayView?.let { view ->
-            runCatching { windowManager.removeView(view) }
-        }
-        overlayView = null
+        dialog?.dismiss()
+        dialog = null
         statusIndicator = null
-        stateLabel = null
         collectJob?.cancel()
         collectJob = null
     }
 
     @SuppressLint("ClickableViewAccessibility")
     private fun createOverlayView(): View {
-        val density = context.resources.displayMetrics.density
-        val sizePx = (52 * density).toInt()
+        val view = FrameLayout(context).apply {
+            layoutParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
 
-        val container = LinearLayout(context).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER_HORIZONTAL
-            setPadding(4, 4, 4, 4)
+            val indicator = View(context).also { v ->
+                statusIndicator = v
+                v.layoutParams = FrameLayout.LayoutParams(indicatorSize, indicatorSize).apply {
+                    gravity = Gravity.CENTER
+                }
+                val shape = GradientDrawable().apply {
+                    shape = GradientDrawable.OVAL
+                    setColor(0xFF1565C0.toInt())
+                    setStroke((1.5f * density).roundToInt(), 0xAAFFFFFF.toInt())
+                }
+                v.background = shape
+            }
+
+            val bg = GradientDrawable().apply {
+                shape = GradientDrawable.RECTANGLE
+                cornerRadii = floatArrayOf(16f, 16f, 16f, 16f, 16f, 16f, 16f, 16f)
+                setColor(0xDD1A1A2E.toInt())
+            }
+            background = bg
+
+            setPadding(8, 8, 8, 8)
+            addView(indicator)
         }
 
-        statusIndicator = ImageView(context).apply {
-            layoutParams = LinearLayout.LayoutParams(sizePx, sizePx)
-            setBackgroundColor(getColorForState(OverlayState.IDLE))
+        view.setOnTouchListener { _, event -> handleTouchEvent(event) }
+        view.setOnLongClickListener {
+            onLongClick()
+            true
         }
-
-        stateLabel = TextView(context).apply {
-            textSize = 9f
-            setTextColor(android.graphics.Color.WHITE)
-            text = "FS"
-            setPadding(4, 2, 4, 2)
-            setBackgroundColor(0x99000000.toInt())
-        }
-
-        container.addView(statusIndicator)
-        container.addView(stateLabel)
-        container.setOnTouchListener { _, event -> handleTouchEvent(event) }
-        return container
+        return view
     }
 
     private fun handleTouchEvent(event: MotionEvent): Boolean {
+        val lp = dialog?.window?.attributes ?: return false
+
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
-                initialX = layoutParams.x
-                initialY = layoutParams.y
+                initialX = lp.x
+                initialY = lp.y
                 initialTouchX = event.rawX
                 initialTouchY = event.rawY
                 isDragging = false
@@ -132,16 +149,14 @@ class OverlayView(
             MotionEvent.ACTION_MOVE -> {
                 val dx = event.rawX - initialTouchX
                 val dy = event.rawY - initialTouchY
-                val touchSlop = (10 * context.resources.displayMetrics.density).toInt()
+                val touchSlop = (10 * density).toInt()
                 if (!isDragging && (abs(dx) > touchSlop || abs(dy) > touchSlop)) {
                     isDragging = true
                 }
                 if (isDragging) {
-                    layoutParams.x = initialX + dx.toInt()
-                    layoutParams.y = initialY + dy.toInt()
-                    overlayView?.let { view ->
-                        runCatching { windowManager.updateViewLayout(view, layoutParams) }
-                    }
+                    lp.x = initialX + dx.toInt()
+                    lp.y = initialY + dy.toInt()
+                    dialog?.window?.attributes = lp
                 }
                 return true
             }
@@ -161,22 +176,25 @@ class OverlayView(
     }
 
     private fun snapToEdge() {
+        val lp = dialog?.window?.attributes ?: return
         val metrics = context.resources.displayMetrics
-        val buttonWidth = (52 * metrics.density).toInt()
-        val centerX = layoutParams.x + buttonWidth / 2
-        layoutParams.x = if (centerX < metrics.widthPixels / 2) {
-            0
-        } else {
-            metrics.widthPixels - buttonWidth
-        }
-        overlayView?.let { view ->
-            runCatching { windowManager.updateViewLayout(view, layoutParams) }
-        }
+        val buttonWidth = indicatorSize + (12 * density).roundToInt()
+        val centerX = lp.x + buttonWidth / 2
+        lp.x = if (centerX < metrics.widthPixels / 2) 0 else metrics.widthPixels - buttonWidth
+        dialog?.window?.attributes = lp
     }
 
     private fun updateState(state: OverlayState) {
-        statusIndicator?.setBackgroundColor(getColorForState(state))
-        stateLabel?.text = getLabelForState(state)
+        lastState = state
+        val color = getColorForState(state)
+        statusIndicator?.let {
+            val shape = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(color)
+                setStroke((1.5f * density).roundToInt(), 0xAAFFFFFF.toInt())
+            }
+            it.background = shape
+        }
     }
 
     private fun getColorForState(state: OverlayState): Int {
@@ -186,24 +204,11 @@ class OverlayView(
             OverlayState.CAPTURING,
             OverlayState.UPLOADING,
             OverlayState.DETECTING -> 0xFF1565C0.toInt()
-            OverlayState.SUCCESS_LOW -> 0xFF4CAF50.toInt()
-            OverlayState.SUCCESS_MEDIUM -> 0xFFFF9800.toInt()
+            OverlayState.SUCCESS_LOW -> 0xFF00E676.toInt()
+            OverlayState.SUCCESS_MEDIUM -> 0xFFFF9100.toInt()
             OverlayState.SUCCESS_HIGH -> 0xFFF44336.toInt()
             OverlayState.FAILURE -> 0xFF9E9E9E.toInt()
         }
     }
 
-    private fun getLabelForState(state: OverlayState): String {
-        return when (state) {
-            OverlayState.IDLE -> "FS"
-            OverlayState.PERMISSION_REQUIRED -> "AUTH"
-            OverlayState.CAPTURING -> "CAP"
-            OverlayState.UPLOADING -> "UP"
-            OverlayState.DETECTING -> "AI"
-            OverlayState.SUCCESS_LOW -> "LOW"
-            OverlayState.SUCCESS_MEDIUM -> "MED"
-            OverlayState.SUCCESS_HIGH -> "HIGH"
-            OverlayState.FAILURE -> "ERR"
-        }
-    }
 }

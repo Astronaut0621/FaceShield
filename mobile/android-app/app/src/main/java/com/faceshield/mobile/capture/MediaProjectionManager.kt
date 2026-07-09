@@ -30,16 +30,29 @@ class MediaProjectionManager(private val context: Context) {
     fun createAuthIntent(): Intent = systemMpm.createScreenCaptureIntent()
 
     fun onAuthResult(resultCode: Int, data: Intent) {
+        recreateFromSaved(resultCode, data)
+    }
+
+    /**
+     * 从之前保存的授权结果重新创建 MediaProjection 会话。
+     * 授权一次后，即使系统回收或异常断开，也可静默恢复，不再弹系统对话框。
+     */
+    fun recreateFromSaved(resultCode: Int, data: Intent): Boolean {
+        releaseVirtualDisplay()
+        mediaProjection?.unregisterCallback(projectionCallback)
         mediaProjection = systemMpm.getMediaProjection(resultCode, data)
         _isAuthorized.value = mediaProjection != null
 
-        mediaProjection?.registerCallback(object : MediaProjection.Callback() {
-            override fun onStop() {
-                releaseVirtualDisplay()
-                _isAuthorized.value = false
-                mediaProjection = null
-            }
-        }, Handler(Looper.getMainLooper()))
+        mediaProjection?.registerCallback(projectionCallback, Handler(Looper.getMainLooper()))
+        return mediaProjection != null
+    }
+
+    private val projectionCallback = object : MediaProjection.Callback() {
+        override fun onStop() {
+            releaseVirtualDisplay()
+            _isAuthorized.value = false
+            mediaProjection = null
+        }
     }
 
     fun createVirtualDisplay(width: Int, height: Int): ImageReader? {

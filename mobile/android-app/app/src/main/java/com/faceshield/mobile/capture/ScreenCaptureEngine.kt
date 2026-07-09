@@ -51,8 +51,8 @@ class ScreenCaptureEngine(
 
                 if (file == null) CaptureResult.EmptyFrame else CaptureResult.Success(file)
             } catch (e: SecurityException) {
-                mediaProjectionManager.release()
-                CaptureResult.ProjectionSessionLost
+                mediaProjectionManager.releaseVirtualDisplay()
+                CaptureResult.BlockedBySystem
             } catch (e: Exception) {
                 val msg = e.message.orEmpty()
                 if (
@@ -63,9 +63,9 @@ class ScreenCaptureEngine(
                 } else {
                     CaptureResult.EmptyFrame
                 }
-            } finally {
-                mediaProjectionManager.releaseVirtualDisplay()
             }
+            // 不释放 VirtualDisplay —— 保持活跃可防止系统回收 MediaProjection，
+            // 下次截屏时 createVirtualDisplay 会自动释放旧的再创建新的
         }
 
     private suspend fun acquireLatestImageWithRetry(

@@ -27,7 +27,7 @@ class DetectionRepository(private val api: FaceShieldApi) {
                         DetectionResult(
                             taskId = data.taskId,
                             fileId = data.fileId,
-                            label = data.label ?: data.prediction ?: "unknown",
+                            label = data.label ?: data.prediction ?: "未知",
                             fakeProbability = data.fakeProbability,
                             confidence = data.confidence,
                             riskLevel = RiskLevel.fromString(data.riskLevel),
@@ -45,17 +45,17 @@ class DetectionRepository(private val api: FaceShieldApi) {
                         )
                     )
                 } else {
-                    NetworkResult.Error(response.code(), "Detection response data is empty.")
+                    NetworkResult.Error(response.code(), "检测响应数据为空")
                 }
             } else if (response.code() == 401) {
-                NetworkResult.Error(401, "Login has expired.")
+                NetworkResult.Error(401, "登录已过期")
             } else {
-                NetworkResult.Error(response.code(), "Detection failed: ${response.message()}")
+                NetworkResult.Error(response.code(), "检测失败：${response.message()}")
             }
         } catch (e: SocketTimeoutException) {
-            NetworkResult.Error(0, "Request timed out.")
+            NetworkResult.Error(0, "请求超时")
         } catch (e: UnknownHostException) {
-            NetworkResult.Error(0, "Cannot connect to server.")
+            NetworkResult.Error(0, "无法连接到服务器")
         } catch (e: Exception) {
             NetworkResult.Exception(e)
         }
@@ -66,9 +66,9 @@ class DetectionRepository(private val api: FaceShieldApi) {
             val response = api.getRecords(page, pageSize)
             if (response.isSuccessful) {
                 response.body()?.data?.let { NetworkResult.Success(it) }
-                    ?: NetworkResult.Error(response.code(), "Record response data is empty.")
+                    ?: NetworkResult.Error(response.code(), "记录响应数据为空")
             } else {
-                NetworkResult.Error(response.code(), "Record query failed.")
+                NetworkResult.Error(response.code(), "查询记录失败")
             }
         } catch (e: Exception) {
             NetworkResult.Exception(e)
@@ -85,7 +85,7 @@ class DetectionRepository(private val api: FaceShieldApi) {
                         DetectionResult(
                             taskId = data.taskId,
                             fileId = data.fileId,
-                            label = data.label ?: data.prediction ?: "unknown",
+                            label = data.label ?: data.prediction ?: "未知",
                             fakeProbability = data.fakeProbability,
                             confidence = data.confidence,
                             riskLevel = RiskLevel.fromString(data.riskLevel),
@@ -103,10 +103,10 @@ class DetectionRepository(private val api: FaceShieldApi) {
                         )
                     )
                 } else {
-                    NetworkResult.Error(response.code(), "Record detail is empty.")
+                    NetworkResult.Error(response.code(), "记录详情为空")
                 }
             } else {
-                NetworkResult.Error(response.code(), "Record detail query failed.")
+                NetworkResult.Error(response.code(), "查询记录详情失败")
             }
         } catch (e: Exception) {
             NetworkResult.Exception(e)

@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">FaceShield</string>
-    <string name="login_title">Sign in</string>
-    <string name="login_username_hint">Username</string>
-    <string name="login_password_hint">Password</string>
-    <string name="login_server_url_hint">Backend URL</string>
-    <string name="login_button">Sign in</string>
-    <string name="permission_title">Permissions</string>
+    <string name="login_title">登录</string>
+    <string name="login_username_hint">用户名</string>
+    <string name="login_password_hint">密码</string>
+    <string name="login_server_url_hint">后端地址</string>
+    <string name="login_button">登录</string>
+    <string name="permission_title">权限设置</string>
     <string name="home_title">FaceShield</string>
-    <string name="home_start_protection">Start protection</string>
-    <string name="home_stop_protection">Stop protection</string>
-    <string name="risk_low">Low risk</string>
-    <string name="risk_medium">Medium risk</string>
-    <string name="risk_high">High risk</string>
-    <string name="risk_unknown">Unknown</string>
-    <string name="notification_channel_name">FaceShield protection</string>
-    <string name="notification_title">FaceShield protection is running</string>
-    <string name="notification_content">Tap the floating button to scan.</string>
-    <string name="notification_stop">Stop</string>
-    <string name="settings_title">Settings</string>
-    <string name="records_title">Records</string>
-    <string name="result_title">Detection Result</string>
+    <string name="home_start_protection">开启防护</string>
+    <string name="home_stop_protection">停止防护</string>
+    <string name="risk_low">低风险</string>
+    <string name="risk_medium">中风险</string>
+    <string name="risk_high">高风险</string>
+    <string name="risk_unknown">未知</string>
+    <string name="notification_channel_name">FaceShield 防护</string>
+    <string name="notification_title">FaceShield 防护运行中</string>
+    <string name="notification_content">点击悬浮按钮进行扫描</string>
+    <string name="notification_stop">停止</string>
+    <string name="settings_title">设置</string>
+    <string name="records_title">检测记录</string>
+    <string name="result_title">检测结果</string>
 </resources>

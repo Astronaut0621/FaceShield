@@ -48,13 +48,13 @@ fun ResultDetailScreen(taskId: Int, onBack: () -> Unit) {
         val app = context.applicationContext as FaceShieldApp
         val serverUrl = app.authTokenStore.serverUrl.firstOrNull().orEmpty()
         if (serverUrl.isBlank()) {
-            errorMessage = "Backend URL is not configured."
+            errorMessage = "未配置后端地址"
             isLoading = false
             return@LaunchedEffect
         }
         val normalizedServerUrl = ServerUrl.normalizeOrNull(serverUrl)
         if (normalizedServerUrl == null) {
-            errorMessage = "Backend URL is invalid. Update it in Settings."
+            errorMessage = "后端地址无效，请在设置中更新"
             isLoading = false
             return@LaunchedEffect
         }
@@ -62,7 +62,7 @@ fun ResultDetailScreen(taskId: Int, onBack: () -> Unit) {
         when (val response = DetectionRepository(app.getApi(normalizedServerUrl)).getRecordDetail(taskId)) {
             is NetworkResult.Success -> result = response.data
             is NetworkResult.Error -> errorMessage = response.message
-            is NetworkResult.Exception -> errorMessage = "Network error."
+            is NetworkResult.Exception -> errorMessage = "网络错误"
         }
         isLoading = false
     }
@@ -70,9 +70,9 @@ fun ResultDetailScreen(taskId: Int, onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Detection Result") },
+                title = { Text("检测结果") },
                 navigationIcon = {
-                    TextButton(onClick = onBack) { Text("Back") }
+                    TextButton(onClick = onBack) { Text("返回") }
                 }
             )
         }
@@ -111,11 +111,11 @@ private fun ResultContent(result: DetectionResult, modifier: Modifier = Modifier
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text("Detection #${result.taskId}", style = MaterialTheme.typography.titleLarge)
+        Text("检测 #${result.taskId}", style = MaterialTheme.typography.titleLarge)
 
         Card(modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text("Risk level", style = MaterialTheme.typography.labelMedium)
+                Text("风险等级", style = MaterialTheme.typography.labelMedium)
                 Text(
                     text = result.riskLevel.displayName,
                     style = MaterialTheme.typography.headlineSmall,
@@ -129,16 +129,16 @@ private fun ResultContent(result: DetectionResult, modifier: Modifier = Modifier
             }
         }
 
-        DetailRow("Label", result.label)
-        result.fakeProbability?.let { DetailRow("Fake probability", "${(it * 100).toInt()}%") }
-        result.confidence?.let { DetailRow("Confidence", "${(it * 100).toInt()}%") }
-        DetailRow("Face detected", if (result.faceDetected) "Yes" else "No")
-        result.frequencyScore?.let { DetailRow("Frequency score", "${(it * 100).toInt()}%") }
-        result.spatialScore?.let { DetailRow("Spatial score", "${(it * 100).toInt()}%") }
-        result.suggestion?.let { DetailRow("Suggestion", it) }
-        result.modelName?.let { DetailRow("Model", it) }
-        result.modelVersion?.let { DetailRow("Model version", it) }
-        result.createdAt?.let { DetailRow("Detected at", it) }
+        DetailRow("标签", result.label)
+        result.fakeProbability?.let { DetailRow("伪造概率", "${(it * 100).toInt()}%") }
+        result.confidence?.let { DetailRow("置信度", "${(it * 100).toInt()}%") }
+        DetailRow("检测到人脸", if (result.faceDetected) "是" else "否")
+        result.frequencyScore?.let { DetailRow("频域分数", "${(it * 100).toInt()}%") }
+        result.spatialScore?.let { DetailRow("空间域分数", "${(it * 100).toInt()}%") }
+        result.suggestion?.let { DetailRow("建议", it) }
+        result.modelName?.let { DetailRow("模型", it) }
+        result.modelVersion?.let { DetailRow("模型版本", it) }
+        result.createdAt?.let { DetailRow("检测时间", it) }
 
         if (!result.faceDetected) {
             Card(
@@ -146,7 +146,7 @@ private fun ResultContent(result: DetectionResult, modifier: Modifier = Modifier
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
             ) {
                 Text(
-                    text = "No clear face was detected. Treat this result as low-confidence.",
+                    text = "未检测到清晰人脸，此结果仅供参考",
                     modifier = Modifier.padding(16.dp),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onErrorContainer

@@ -51,10 +51,10 @@ fun SettingsScreen(onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Settings") },
+                title = { Text("设置") },
                 navigationIcon = {
                     TextButton(onClick = onBack) {
-                        Text("Back")
+                        Text("返回")
                     }
                 }
             )
@@ -72,7 +72,7 @@ fun SettingsScreen(onBack: () -> Unit) {
                     serverUrl = it
                     statusMessage = null
                 },
-                label = { Text("Backend URL") },
+                label = { Text("后端地址") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 trailingIcon = {
@@ -80,7 +80,7 @@ fun SettingsScreen(onBack: () -> Unit) {
                         val normalizedServerUrl = ServerUrl.normalizeOrNull(serverUrl)
                         if (normalizedServerUrl == null) {
                             isStatusError = true
-                            statusMessage = "Backend URL must be a valid http:// or https:// URL."
+                            statusMessage = "后端地址必须是有效的 http:// 或 https:// 地址"
                             return@TextButton
                         }
                         coroutineScope.launch {
@@ -90,14 +90,14 @@ fun SettingsScreen(onBack: () -> Unit) {
                             }.onSuccess {
                                 serverUrl = normalizedServerUrl
                                 isStatusError = false
-                                statusMessage = "Backend URL saved."
+                                statusMessage = "后端地址已保存"
                             }.onFailure {
                                 isStatusError = true
-                                statusMessage = "Backend URL could not be saved."
+                                statusMessage = "后端地址保存失败"
                             }
                         }
                     }) {
-                        Text("Save")
+                        Text("保存")
                     }
                 }
             )
@@ -119,10 +119,10 @@ fun SettingsScreen(onBack: () -> Unit) {
 
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Privacy", style = MaterialTheme.typography.titleMedium)
+                    Text("隐私说明", style = MaterialTheme.typography.titleMedium)
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        "FaceShield captures the current screen only when you tap the floating button. The screenshot is uploaded to your configured backend for AI face-forgery detection. You can stop protection at any time.",
+                        "FaceShield 仅在您点击悬浮按钮时截取当前屏幕，截图会上传至您配置的后端进行 AI 换脸检测。您可以随时停止防护。",
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
@@ -134,7 +134,7 @@ fun SettingsScreen(onBack: () -> Unit) {
                 onClick = { showLogoutDialog = true },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Sign out", color = MaterialTheme.colorScheme.error)
+                Text("退出登录", color = MaterialTheme.colorScheme.error)
             }
         }
     }
@@ -142,8 +142,8 @@ fun SettingsScreen(onBack: () -> Unit) {
     if (showLogoutDialog) {
         AlertDialog(
             onDismissRequest = { showLogoutDialog = false },
-            title = { Text("Sign out") },
-            text = { Text("Are you sure you want to sign out?") },
+            title = { Text("退出登录") },
+            text = { Text("确定要退出登录吗？") },
             confirmButton = {
                 TextButton(onClick = {
                     showLogoutDialog = false
@@ -152,16 +152,16 @@ fun SettingsScreen(onBack: () -> Unit) {
                             .onSuccess { logoutSuccess = true }
                             .onFailure {
                                 isStatusError = true
-                                statusMessage = "Sign out failed, please try again."
+                                statusMessage = "退出登录失败，请重试"
                             }
                     }
                 }) {
-                    Text("Confirm", color = MaterialTheme.colorScheme.error)
+                    Text("确定", color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showLogoutDialog = false }) {
-                    Text("Cancel")
+                    Text("取消")
                 }
             }
         )

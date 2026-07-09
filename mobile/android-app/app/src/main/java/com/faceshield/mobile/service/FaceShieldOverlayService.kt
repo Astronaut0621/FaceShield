@@ -10,7 +10,7 @@ import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
-import android.provider.Settings
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import com.faceshield.mobile.FaceShieldApp
@@ -41,6 +41,7 @@ import kotlinx.coroutines.launch
 class FaceShieldOverlayService : Service() {
 
     companion object {
+        private const val TAG = "FaceShieldOverlaySvc"
         const val CHANNEL_ID = "faceshield_overlay_channel"
         const val NOTIFICATION_ID = 1001
         const val ACTION_STOP = "com.faceshield.mobile.ACTION_STOP_PROTECTION"
@@ -49,12 +50,25 @@ class FaceShieldOverlayService : Service() {
         private val _serviceState = MutableStateFlow(ServiceState.STOPPED)
         val serviceState: StateFlow<ServiceState> = _serviceState.asStateFlow()
 
+        // 启动失败时的详细原因，供 HomeScreen 显示
+        private val _startError = MutableStateFlow<String?>(null)
+        val startError: StateFlow<String?> = _startError.asStateFlow()
+
         private var mediaProjectionResultCode: Int = 0
         private var mediaProjectionResultData: Intent? = null
+
+        // PermissionGuideScreen 查询屏幕录制授权结果用
+        private var _mediaProjectionJustGranted = false
+        fun consumeMediaProjectionJustGranted(): Boolean {
+            val v = _mediaProjectionJustGranted
+            _mediaProjectionJustGranted = false
+            return v
+        }
 
         fun setMediaProjectionResult(resultCode: Int, data: Intent) {
             mediaProjectionResultCode = resultCode
             mediaProjectionResultData = Intent(data)
+            _mediaProjectionJustGranted = true
             _serviceState.value = ServiceState.RUNNING
         }
     }
@@ -73,35 +87,44 @@ class FaceShieldOverlayService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent?.action == ACTION_STOP) {
-            stopProtection()
-            return START_NOT_STICKY
-        }
+        try {
+            if (intent?.action == ACTION_STOP) {
+                stopProtection()
+                return START_NOT_STICKY
+            }
 
-        _serviceState.value = ServiceState.STARTING
-        startOverlayForeground("Tap the floating button to scan.")
+            _serviceState.value = ServiceState.STARTING
+            startOverlayForeground("点击悬浮按钮进行扫描")
 
-        if (!Settings.canDrawOverlays(this)) {
-            overlayStateManager.transitionTo(OverlayState.PERMISSION_REQUIRED)
+            // 处理已获得的 MediaProjection 授权结果
+            if (intent?.action == ACTION_MEDIA_PROJECTION_READY || mediaProjectionResultData != null) {
+                startMediaProjectionForeground("已获取屏幕录制授权")
+                consumePendingProjectionResult()
+            }
+
+            if (!overlayView.show()) {
+                overlayStateManager.transitionTo(OverlayState.FAILURE)
+                _serviceState.value = ServiceState.ERROR
+                _startError.value = "悬浮窗无法显示：请检查系统设置中已允许「显示悬浮窗」权限"
+                updateNotificationText("悬浮窗无法显示")
+                return START_NOT_STICKY
+            }
+
+            _serviceState.value = ServiceState.RUNNING
+            _startError.value = null
+
+            // 已授权则直接就绪，否则等用户点击悬浮窗时再授权
+            if (mediaProjectionManager.isAuthorized.value) {
+                overlayStateManager.transitionTo(OverlayState.IDLE)
+            } else {
+                overlayStateManager.transitionTo(OverlayState.IDLE)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "onStartCommand 异常", e)
             _serviceState.value = ServiceState.ERROR
-            updateNotificationText("Overlay permission is required.")
-            return START_NOT_STICKY
+            _startError.value = "服务启动失败: ${e.localizedMessage}"
+            updateNotificationText("服务启动失败: ${e.localizedMessage}")
         }
-
-        if (intent?.action == ACTION_MEDIA_PROJECTION_READY || mediaProjectionResultData != null) {
-            startMediaProjectionForeground("Screen capture authorization received.")
-        }
-        consumePendingProjectionResult()
-        if (intent?.action == ACTION_MEDIA_PROJECTION_READY) {
-            overlayStateManager.transitionTo(OverlayState.IDLE)
-        }
-        if (!overlayView.show()) {
-            overlayStateManager.transitionTo(OverlayState.FAILURE)
-            _serviceState.value = ServiceState.ERROR
-            updateNotificationText("Floating window could not be shown.")
-            return START_NOT_STICKY
-        }
-        _serviceState.value = ServiceState.RUNNING
         return START_NOT_STICKY
     }
 
@@ -122,6 +145,18 @@ class FaceShieldOverlayService : Service() {
         overlayStateManager = OverlayStateManager(serviceScope)
         mediaProjectionManager = MediaProjectionManager(this)
 
+        // 立即创建 DetectionOrchestrator，不依赖网络
+        // captureEngine 和 basic repo 不需要登录也能工作
+        val captureEngine = ScreenCaptureEngine(this@FaceShieldOverlayService, mediaProjectionManager)
+        val defaultApi = app.apiClient.getApi(ServerUrl.DEFAULT)
+        detectionOrchestrator = DetectionOrchestrator(
+            captureEngine = captureEngine,
+            detectionRepository = DetectionRepository(defaultApi),
+            currentUserSession = CurrentUserSession(AuthRepository(defaultApi, tokenStore)),
+            mediaProjectionManager = mediaProjectionManager
+        )
+
+        // 异步：完善 API 地址和登录会话
         serviceScope.launch {
             runCatching {
                 val serverUrl = tokenStore.serverUrl.firstOrNull().orEmpty()
@@ -133,15 +168,13 @@ class FaceShieldOverlayService : Service() {
                 currentUserSession.refresh()
 
                 detectionOrchestrator = DetectionOrchestrator(
-                    captureEngine = ScreenCaptureEngine(this@FaceShieldOverlayService, mediaProjectionManager),
+                    captureEngine = captureEngine,
                     detectionRepository = DetectionRepository(authenticatedApi),
                     currentUserSession = currentUserSession,
                     mediaProjectionManager = mediaProjectionManager
                 )
-            }.onFailure {
-                overlayStateManager.transitionTo(OverlayState.FAILURE)
-                _serviceState.value = ServiceState.ERROR
-                updateNotificationText("Mobile workflow initialization failed.")
+            }.onFailure { e ->
+                Log.e(TAG, "移动端工作流初始化失败（不影响悬浮窗显示）", e)
             }
         }
 
@@ -156,13 +189,9 @@ class FaceShieldOverlayService : Service() {
     }
 
     private fun onOverlayClicked() {
-        if (!::detectionOrchestrator.isInitialized) {
-            overlayStateManager.transitionTo(OverlayState.FAILURE)
-            overlayStateManager.resetAfterDelay()
-            return
-        }
         if (detectionOrchestrator.isCurrentlyDetecting()) return
 
+        // 每次点击都检查授权，未授权则弹出系统对话框
         if (!mediaProjectionManager.isAuthorized.value) {
             if (!consumePendingProjectionResult()) {
                 overlayStateManager.transitionTo(OverlayState.PERMISSION_REQUIRED)
@@ -183,6 +212,7 @@ class FaceShieldOverlayService : Service() {
                     DetectionState.CaptureAuthRequired -> {
                         overlayStateManager.transitionTo(OverlayState.PERMISSION_REQUIRED)
                         _serviceState.value = ServiceState.CAPTURE_AUTH_REQUIRED
+                        openMediaProjectionRequest()
                     }
                     DetectionState.Capturing -> {
                         overlayStateManager.transitionTo(OverlayState.CAPTURING)
@@ -208,13 +238,18 @@ class FaceShieldOverlayService : Service() {
                     }
                 }
             }
+            // 检测结束后释放授权并清除保存数据，确保下次点击重新弹系统授权框
+            mediaProjectionManager.release()
+            mediaProjectionResultData = null
+            _serviceState.value = ServiceState.RUNNING
         }
     }
 
     private fun consumePendingProjectionResult(): Boolean {
         val data = mediaProjectionResultData ?: return false
         mediaProjectionManager.onAuthResult(mediaProjectionResultCode, data)
-        mediaProjectionResultData = null
+        // 不 null mediaProjectionResultData —— 永久保存授权数据，
+        // 后续若系统回收 MediaProjection 可静默恢复，不再重复弹框
         return mediaProjectionManager.isAuthorized.value
     }
 
@@ -231,15 +266,15 @@ class FaceShieldOverlayService : Service() {
             overlayStateManager.state.collect { state ->
                 updateNotificationText(
                     when (state) {
-                        OverlayState.IDLE -> "Tap the floating button to scan."
-                        OverlayState.PERMISSION_REQUIRED -> "Screen capture authorization is required."
-                        OverlayState.CAPTURING -> "Capturing screen..."
-                        OverlayState.UPLOADING -> "Uploading screenshot..."
-                        OverlayState.DETECTING -> "Running AI detection..."
-                        OverlayState.SUCCESS_LOW -> "Low risk detected."
-                        OverlayState.SUCCESS_MEDIUM -> "Medium risk detected."
-                        OverlayState.SUCCESS_HIGH -> "High risk detected."
-                        OverlayState.FAILURE -> "Detection failed."
+                        OverlayState.IDLE -> "点击悬浮按钮进行扫描"
+                        OverlayState.PERMISSION_REQUIRED -> "需要屏幕录制授权"
+                        OverlayState.CAPTURING -> "正在截取屏幕..."
+                        OverlayState.UPLOADING -> "正在上传截图..."
+                        OverlayState.DETECTING -> "正在运行 AI 检测..."
+                        OverlayState.SUCCESS_LOW -> "检测到低风险"
+                        OverlayState.SUCCESS_MEDIUM -> "检测到中风险"
+                        OverlayState.SUCCESS_HIGH -> "检测到高风险"
+                        OverlayState.FAILURE -> "检测失败"
                     }
                 )
             }
@@ -257,10 +292,10 @@ class FaceShieldOverlayService : Service() {
     private fun createNotificationChannel() {
         val channel = NotificationChannel(
             CHANNEL_ID,
-            "FaceShield protection",
+            "FaceShield 防护",
             NotificationManager.IMPORTANCE_LOW
         ).apply {
-            description = "FaceShield floating detection service"
+            description = "FaceShield 悬浮检测服务"
         }
         val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.createNotificationChannel(channel)
@@ -282,11 +317,11 @@ class FaceShieldOverlayService : Service() {
         )
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("FaceShield protection is running")
+            .setContentTitle("FaceShield 防护运行中")
             .setContentText(text)
             .setSmallIcon(android.R.drawable.ic_menu_camera)
             .setContentIntent(openPending)
-            .addAction(android.R.drawable.ic_menu_close_clear_cancel, "Stop", stopPending)
+            .addAction(android.R.drawable.ic_menu_close_clear_cancel, "停止", stopPending)
             .setOngoing(true)
             .build()
     }

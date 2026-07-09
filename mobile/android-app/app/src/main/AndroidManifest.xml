@@ -36,7 +36,7 @@
             android:foregroundServiceType="specialUse|mediaProjection">
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="floating video-call detection control" />
+                android:value="视频通话悬浮检测控制" />
         </service>
 
     </application>
