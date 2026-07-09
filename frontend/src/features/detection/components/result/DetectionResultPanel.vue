@@ -86,7 +86,9 @@ defineProps({
 .result-panel {
   display: grid;
   gap: 24px;
-  background: rgba(255, 255, 255, 0.96);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.97), rgba(247, 249, 252, 0.94)),
+    var(--surface);
   border: 1px solid var(--line);
   border-radius: 20px;
   padding: 24px;
@@ -137,7 +139,7 @@ defineProps({
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 16px;
   padding: 16px;
-  background: var(--surface-soft);
+  background: rgba(247, 249, 252, 0.86);
   border: 1px solid var(--line);
   border-radius: 16px;
 }

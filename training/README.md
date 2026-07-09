@@ -253,6 +253,66 @@ F1 in the scanned range and improves fake recall compared with the default
 `0.50` as the binary `label` threshold and uses the threshold scan to define
 display-only risk levels: `<0.35` low, `0.35-0.80` medium, `>=0.80` high.
 
+## Cross-Domain Evaluation
+
+Use `evaluate_cross_domain.py` to evaluate deployed checkpoints on data that was
+not used for training. The current priority is:
+
+```text
+Plan A: FaceForensics++ original + FaceSwap/Face2Face test split
+Plan B: Celeb-DF v2 test videos
+```
+
+For FaceForensics++ FaceSwap:
+
+```powershell
+.\.venv\Scripts\python.exe tools\extract_ffpp_frames.py `
+  --fake-method FaceSwap `
+  --output-dir data\ffpp_frames_faceswap `
+  --compression c23 `
+  --frame-interval 20
+
+.\.venv\Scripts\python.exe tools\extract_faces.py `
+  --input-manifest data\ffpp_frames_faceswap\manifest.csv `
+  --frames-root data\ffpp_frames_faceswap `
+  --output-dir data\ffpp_faces_faceswap
+
+.\.venv\Scripts\python.exe training\evaluate_cross_domain.py `
+  --data-root data\ffpp_faces_faceswap `
+  --manifest face_manifest.csv `
+  --split test `
+  --domain-name ffpp_faceswap `
+  --model-dir model\deploy\fusion_v2 `
+  --output-dir model\cross_domain\ffpp_faceswap `
+  --device cpu
+```
+
+For Celeb-DF v2:
+
+```powershell
+.\.venv\Scripts\python.exe tools\extract_celebdf_frames.py `
+  --dataset-root data\Celeb-DF-v2 `
+  --output-dir data\celebdf_frames `
+  --frame-interval 20
+
+.\.venv\Scripts\python.exe tools\extract_faces.py `
+  --input-manifest data\celebdf_frames\manifest.csv `
+  --frames-root data\celebdf_frames `
+  --output-dir data\celebdf_faces
+
+.\.venv\Scripts\python.exe training\evaluate_cross_domain.py `
+  --data-root data\celebdf_faces `
+  --manifest face_manifest.csv `
+  --split test `
+  --domain-name celebdf_v2 `
+  --model-dir model\deploy\fusion_v2 `
+  --output-dir model\cross_domain\celebdf_v2 `
+  --device cpu
+```
+
+The evaluator writes `metrics.json`, `metrics.csv`, `group_summary.csv`,
+`predictions.csv`, and `summary.md`.
+
 ## Upload Scope
 
 Only these are required on AutoDL:

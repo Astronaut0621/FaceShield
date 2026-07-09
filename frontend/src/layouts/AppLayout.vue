@@ -1,39 +1,38 @@
 <template>
-  <div class="app-shell">
-    <header class="topbar">
-      <RouterLink class="brand-block" to="/">
-        <span class="brand-mark" aria-hidden="true">F</span>
-        <div>
-          <h1>{{ appConfig.name }}</h1>
-          <p>频域与空域融合检测</p>
-        </div>
-      </RouterLink>
-
-      <nav class="top-nav" aria-label="主导航">
-        <RouterLink
-          v-for="item in navigationItems"
-          :key="item.name"
-          :to="{ name: item.name }"
-          :class="{ active: route.name === item.name }"
-        >
-          <span class="nav-icon" aria-hidden="true">{{ item.icon }}</span>
-          <span>{{ item.label }}</span>
+  <div class="app-shell app-page-shell">
+    <div class="app-frame">
+      <header class="topbar">
+        <RouterLink class="brand-block" to="/">
+          <img class="brand-mark" src="/images/logo.png" alt="" aria-hidden="true" />
+          <span class="brand-name">{{ appConfig.name }}</span>
         </RouterLink>
-      </nav>
 
-      <div v-if="authStore.isAuthenticated" class="session-box">
-        <span class="session-label">当前账号</span>
-        <span class="user-name">{{ authStore.user?.display_name || authStore.user?.username }}</span>
-        <button @click="signOut">退出登录</button>
-      </div>
-    </header>
-    <main class="app-main">
-      <slot />
-    </main>
+        <div class="topbar-actions">
+          <nav class="top-nav" aria-label="主导航">
+            <RouterLink
+              v-for="item in navigationItems"
+              :key="item.name"
+              :to="item.path"
+              :class="{ active: route.name === item.name }"
+            >
+              {{ item.label }}
+            </RouterLink>
+          </nav>
+          <span v-if="authStore.isAuthenticated" class="user-name">{{ displayName }}</span>
+          <button v-if="authStore.isAuthenticated" class="session-action" @click="signOut">
+            退出登录
+          </button>
+        </div>
+      </header>
+      <main class="app-main">
+        <slot />
+      </main>
+    </div>
   </div>
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { appConfig } from '@/config/app.config'
 import { navigationItems } from '@/constants/routes'
@@ -41,6 +40,7 @@ import { logout } from '@/features/auth/services/auth.service'
 import { authStore } from '@/stores/auth.store'
 
 const route = useRoute()
+const displayName = computed(() => authStore.user?.display_name || authStore.user?.username || '当前用户')
 
 async function signOut() {
   try {
@@ -53,190 +53,193 @@ async function signOut() {
 </script>
 
 <style scoped>
+.app-page-shell {
+  min-height: 100dvh;
+  padding: 18px;
+  background: transparent;
+}
+
+.app-frame {
+  min-height: calc(100dvh - 36px);
+  overflow: hidden;
+  border: 1px solid rgba(216, 224, 236, 0.9);
+  border-radius: 24px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(247, 249, 252, 0.92)),
+    var(--surface);
+  box-shadow: var(--shadow);
+}
+
 .topbar {
   position: sticky;
   top: 0;
   z-index: 20;
-  display: grid;
-  grid-template-columns: minmax(190px, auto) minmax(0, 1fr) auto;
+  display: flex;
   align-items: center;
-  gap: 18px;
-  min-height: 72px;
-  padding: 12px 28px;
-  background:
-    linear-gradient(180deg, rgba(17, 24, 39, 0.98), rgba(30, 41, 59, 0.98)),
-    #111827;
-  color: #fff;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.14);
+  justify-content: space-between;
+  gap: 24px;
+  min-height: 68px;
+  padding: 14px 24px;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--text);
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid rgba(216, 224, 236, 0.76);
 }
 
 .brand-block {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   text-decoration: none;
   color: inherit;
-  border-radius: 14px;
-  padding: 8px;
-  transition: background 0.16s ease;
+  font-size: 18px;
+  font-weight: 800;
   min-width: 0;
-}
-
-.brand-block:hover {
-  background: rgba(255, 255, 255, 0.07);
 }
 
 .brand-mark {
   width: 38px;
   height: 38px;
-  display: grid;
-  place-items: center;
-  border-radius: 12px;
-  background: linear-gradient(135deg, var(--accent-glow), var(--accent));
-  color: #0f172a;
-  font-weight: 900;
-  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.28);
+  display: block;
+  border: 1px solid rgba(37, 99, 235, 0.16);
+  border-radius: 50%;
+  background: #fff;
+  object-fit: cover;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.14);
   flex-shrink: 0;
 }
 
-.brand-block h1 {
-  margin: 0;
-  font-size: 20px;
-  color: #fff;
+.brand-name {
+  white-space: nowrap;
 }
 
-.brand-block p {
-  margin: 3px 0 0;
-  color: rgba(226, 232, 240, 0.68);
-  font-size: 12px;
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 0;
 }
 
 .top-nav {
   display: flex;
-  justify-content: center;
+  align-items: center;
+  justify-content: flex-end;
   gap: 8px;
   min-width: 0;
 }
 
 .top-nav a {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
-  min-height: 44px;
-  color: rgba(231, 241, 236, 0.78);
+  height: 38px;
+  color: var(--muted-strong);
   text-decoration: none;
-  padding: 9px 12px;
-  border-radius: 12px;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-size: 14px;
   font-weight: 650;
   transition:
     background 0.16s ease,
-    color 0.16s ease,
-    transform 0.16s ease;
+    color 0.16s ease;
 }
 
 .top-nav a:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 .top-nav a.router-link-active,
 .top-nav a.active {
-  background: rgba(147, 197, 253, 0.16);
-  color: #fff;
-  box-shadow: inset 0 0 0 1px rgba(147, 197, 253, 0.2);
-}
-
-.nav-icon {
-  width: 26px;
-  height: 26px;
-  display: grid;
-  place-items: center;
-  border-radius: 9px;
-  background: rgba(255, 255, 255, 0.07);
-  color: rgba(226, 232, 240, 0.82);
-  font-size: 12px;
-  font-weight: 800;
-  flex-shrink: 0;
-}
-
-.top-nav a.active .nav-icon {
-  background: rgba(147, 197, 253, 0.18);
-  color: var(--accent-glow);
-}
-
-.session-box {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-  color: rgba(231, 241, 236, 0.78);
-  font-size: 14px;
-}
-
-.session-label {
-  color: rgba(226, 232, 240, 0.56);
-  font-size: 12px;
-  white-space: nowrap;
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 .user-name {
-  max-width: 140px;
+  max-width: 120px;
+  padding: 0 4px;
+  color: var(--text);
+  font-size: 14px;
   font-weight: 750;
-  color: #e2e8f0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.session-box button {
-  min-height: 36px;
+.session-action {
+  height: 38px;
+  min-height: 38px;
   padding: 0 12px;
-  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--muted-strong);
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 650;
   white-space: nowrap;
-}
-
-.session-box button:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.16);
   box-shadow: none;
 }
 
+.session-action:hover:not(:disabled) {
+  background: var(--accent-soft);
+  color: var(--accent);
+  box-shadow: none;
+}
+
+.app-main {
+  min-width: 0;
+  width: min(1180px, calc(100% - 56px));
+  margin: 0 auto;
+  padding: 32px 0 48px;
+  flex: 1;
+}
+
 @media (max-width: 980px) {
+  .app-page-shell {
+    padding: 10px;
+  }
+
+  .app-frame {
+    min-height: calc(100dvh - 20px);
+    border-radius: 20px;
+  }
+
   .topbar {
-    grid-template-columns: 1fr;
-    align-items: stretch;
+    align-items: flex-start;
+    flex-direction: column;
     gap: 10px;
     padding: 12px 16px;
     position: static;
   }
 
-  .top-nav {
+  .topbar-actions {
+    width: 100%;
     justify-content: flex-start;
     overflow-x: auto;
     padding-bottom: 4px;
   }
 
-  .session-box {
-    justify-content: space-between;
-    padding-top: 2px;
+  .top-nav {
+    justify-content: flex-start;
+  }
+
+  .app-main {
+    width: min(100% - 32px, 1180px);
+    padding: 22px 0 36px;
   }
 }
 
 @media (max-width: 560px) {
-  .brand-block p {
-    display: none;
-  }
-
   .top-nav a {
     flex: 0 0 auto;
   }
 
-  .session-box {
-    flex-wrap: wrap;
+  .user-name {
+    flex: 0 0 auto;
   }
 
-  .user-name {
-    max-width: 180px;
+  .session-action {
+    flex: 0 0 auto;
   }
 }
 </style>

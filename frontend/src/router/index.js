@@ -8,6 +8,7 @@ import HistoryView from '@/views/history/HistoryView.vue'
 import HistoryDetailView from '@/views/history/HistoryDetailView.vue'
 import ResultView from '@/views/result/ResultView.vue'
 import AssetCenterView from '@/views/assets/AssetCenterView.vue'
+import SettingsView from '@/views/settings/SettingsView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -19,7 +20,8 @@ const router = createRouter({
     { path: '/detection', redirect: '/detective' },
     { path: '/result/:id', name: routeNames.result, component: ResultView },
     { path: '/history', name: routeNames.history, component: HistoryView },
-    { path: '/history/:id', name: routeNames.historyDetail, component: HistoryDetailView }
+    { path: '/history/:id', name: routeNames.historyDetail, component: HistoryDetailView },
+    { path: '/settings', name: routeNames.settings, component: SettingsView }
   ]
 })
 

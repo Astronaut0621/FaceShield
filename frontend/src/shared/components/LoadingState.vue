@@ -17,10 +17,16 @@ defineProps({
 
 <style scoped>
 .loading-state {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 10px;
   margin-bottom: 16px;
+  width: fit-content;
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid rgba(37, 99, 235, 0.12);
+  border-radius: 999px;
+  background: var(--accent-soft);
   color: var(--muted);
   font-size: 14px;
 }

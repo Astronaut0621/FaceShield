@@ -1,6 +1,7 @@
 <template>
   <div class="history-table">
     <div class="row head">
+      <span>编号</span>
       <span>缩略图</span>
       <span>文件名</span>
       <span>模型结果</span>
@@ -10,11 +11,12 @@
       <span>操作</span>
     </div>
     <div
-      v-for="item in items"
+      v-for="(item, index) in items"
       :key="item.taskId"
       class="row body"
       @click="goDetail(item.taskId)"
     >
+      <span class="index-cell">{{ getRowNumber(index) }}</span>
       <span class="thumb-cell">
         <img
           v-if="item.originalImageUrl"
@@ -45,10 +47,18 @@ import { routeNames } from '@/constants/routes'
 import { formatDateTime, formatLabel, formatPercent } from '@/utils/formatters'
 import { resolveStorageUrl } from '@/utils/storage'
 
-defineProps({
+const props = defineProps({
   items: {
     type: Array,
     default: () => []
+  },
+  page: {
+    type: Number,
+    default: 1
+  },
+  pageSize: {
+    type: Number,
+    default: 10
   }
 })
 
@@ -58,11 +68,17 @@ function goDetail(taskId) {
   if (!taskId) return
   router.push({ name: routeNames.historyDetail, params: { id: taskId } })
 }
+
+function getRowNumber(index) {
+  return (props.page - 1) * props.pageSize + index + 1
+}
 </script>
 
 <style scoped>
 .history-table {
-  background: rgba(255, 255, 255, 0.96);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.97), rgba(247, 249, 252, 0.94)),
+    var(--surface);
   border: 1px solid var(--line);
   border-radius: 18px;
   overflow: hidden;
@@ -71,7 +87,7 @@ function goDetail(taskId) {
 
 .row {
   display: grid;
-  grid-template-columns: 72px 1.4fr 100px 90px 100px 150px 90px;
+  grid-template-columns: 58px 72px 1.4fr 100px 90px 100px 150px 90px;
   gap: 12px;
   align-items: center;
   padding: 12px 16px;
@@ -79,7 +95,7 @@ function goDetail(taskId) {
 }
 
 .row.head {
-  background: var(--surface-soft);
+  background: rgba(247, 249, 252, 0.9);
   font-size: 13px;
   font-weight: 700;
   color: var(--muted-strong);
@@ -91,11 +107,17 @@ function goDetail(taskId) {
 }
 
 .row.body:hover {
-  background: var(--surface-soft);
+  background: rgba(234, 241, 255, 0.58);
 }
 
 .row:last-child {
   border-bottom: 0;
+}
+
+.index-cell {
+  color: var(--muted-strong);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
 }
 
 .thumb {

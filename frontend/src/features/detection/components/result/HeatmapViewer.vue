@@ -96,12 +96,13 @@ function onHeatmapError() {
 
 .heatmap-stage {
   position: relative;
-  border-radius: 10px;
+  border-radius: 16px;
   overflow: hidden;
   background: var(--text);
   min-height: 260px;
   display: grid;
   place-items: center;
+  border: 1px solid var(--line);
 }
 
 .heatmap-stage img {
@@ -124,7 +125,7 @@ function onHeatmapError() {
   gap: 8px;
   min-height: 220px;
   border: 1px dashed var(--line-strong);
-  border-radius: 10px;
+  border-radius: 16px;
   background: var(--surface-soft);
   text-align: center;
   padding: 24px;

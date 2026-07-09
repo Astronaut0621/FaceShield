@@ -17,3 +17,8 @@ export async function getAsset(fileId) {
   const response = await http.get(`/assets/${fileId}`)
   return unwrapApiResponse(response)
 }
+
+export async function deleteAsset(fileId) {
+  const response = await http.delete(`/assets/${fileId}`)
+  return unwrapApiResponse(response)
+}

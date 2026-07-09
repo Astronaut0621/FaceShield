@@ -2,7 +2,7 @@
   <section class="login-page">
     <form class="login-panel" @submit.prevent="submit">
       <div class="brand">
-        <span class="brand-mark" aria-hidden="true">F</span>
+        <img class="brand-mark" src="/images/logo.png" alt="" aria-hidden="true" />
         <h1>FaceShield</h1>
         <p>AI 换脸伪造检测系统</p>
       </div>
@@ -72,16 +72,14 @@ async function submit() {
 }
 
 .brand-mark {
-  width: 48px;
-  height: 48px;
-  display: grid;
-  place-items: center;
-  border-radius: 15px;
-  background: var(--accent);
-  color: #fff;
-  font-size: 22px;
-  font-weight: 900;
-  box-shadow: 0 14px 34px rgba(37, 99, 235, 0.22);
+  width: 66px;
+  height: 66px;
+  display: block;
+  border: 1px solid rgba(37, 99, 235, 0.16);
+  border-radius: 50%;
+  background: #fff;
+  object-fit: cover;
+  box-shadow: 0 14px 34px rgba(37, 99, 235, 0.18);
 }
 
 .brand h1 {

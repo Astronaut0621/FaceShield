@@ -83,21 +83,4 @@ watch(() => route.params.id, loadResult)
 .result-page {
   max-width: 1040px;
 }
-
-.secondary-btn {
-  min-height: 38px;
-  padding: 0 14px;
-  border: 1px solid var(--line-strong);
-  border-radius: 10px;
-  background: #fff;
-  color: var(--muted-strong);
-  cursor: pointer;
-  font-weight: 700;
-}
-
-.secondary-btn:hover {
-  background: var(--accent-soft);
-  color: var(--accent);
-  box-shadow: none;
-}
 </style>

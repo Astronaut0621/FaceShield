@@ -30,7 +30,12 @@
     <LoadingState :active="loading" message="加载历史记录..." />
     <InlineError :message="error" />
 
-    <HistoryTable v-if="historyStore.items.length" :items="historyStore.items" />
+    <HistoryTable
+      v-if="historyStore.items.length"
+      :items="historyStore.items"
+      :page="page"
+      :page-size="pageSize"
+    />
     <EmptyState v-else-if="!loading" message="暂无检测记录，上传图片开始第一次检测吧。">
       <template #action>
         <button @click="router.push('/detective')">去检测</button>
@@ -114,10 +119,11 @@ onMounted(load)
   flex-wrap: wrap;
   gap: 12px;
   margin-bottom: 18px;
-  padding: 14px;
-  background: rgba(255, 255, 255, 0.82);
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.94);
   border: 1px solid var(--line);
   border-radius: 16px;
+  box-shadow: 0 12px 30px rgba(23, 32, 51, 0.05);
 }
 
 .filters label {
@@ -129,7 +135,7 @@ onMounted(load)
 }
 
 .filters select {
-  height: 36px;
+  height: 40px;
   min-width: 140px;
   border: 1px solid var(--line-strong);
   border-radius: 10px;

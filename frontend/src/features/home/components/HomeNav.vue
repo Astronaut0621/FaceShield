@@ -1,18 +1,41 @@
 <template>
   <header class="home-nav">
     <RouterLink class="brand" to="/">
-      <span class="brand-mark" aria-hidden="true">F</span>
+      <img class="brand-mark" src="/images/logo.png" alt="" aria-hidden="true" />
       <span>FaceShield</span>
     </RouterLink>
 
-    <nav class="nav-links" aria-label="首页导航">
-      <RouterLink to="/">首页</RouterLink>
-      <RouterLink to="/detective">图片检测</RouterLink>
-      <RouterLink to="/history">历史记录</RouterLink>
-      <a href="#features">功能介绍</a>
-    </nav>
+    <div class="nav-actions">
+      <nav class="nav-links" aria-label="首页导航">
+        <RouterLink v-for="item in navigationItems" :key="item.name" :to="item.path">
+          {{ item.label }}
+        </RouterLink>
+      </nav>
+      <span v-if="authStore.isAuthenticated" class="user-name">{{ displayName }}</span>
+      <button v-if="authStore.isAuthenticated" class="session-action" @click="signOut">
+        退出登录
+      </button>
+    </div>
   </header>
 </template>
+
+<script setup>
+import { computed } from 'vue'
+import { navigationItems } from '@/constants/routes'
+import { logout } from '@/features/auth/services/auth.service'
+import { authStore } from '@/stores/auth.store'
+
+const displayName = computed(() => authStore.user?.display_name || authStore.user?.username || '当前用户')
+
+async function signOut() {
+  try {
+    await logout()
+  } finally {
+    authStore.clearSession()
+    window.location.href = '/login'
+  }
+}
+</script>
 
 <style scoped>
 .home-nav {
@@ -38,15 +61,22 @@
 }
 
 .brand-mark {
-  width: 34px;
-  height: 34px;
-  display: grid;
-  place-items: center;
-  border-radius: 11px;
-  background: var(--accent);
-  color: #fff;
-  font-size: 16px;
-  font-weight: 900;
+  width: 38px;
+  height: 38px;
+  display: block;
+  border: 1px solid rgba(37, 99, 235, 0.16);
+  border-radius: 50%;
+  background: #fff;
+  object-fit: cover;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.14);
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 0;
 }
 
 .nav-links {
@@ -76,13 +106,44 @@
   color: var(--accent);
 }
 
+.user-name {
+  max-width: 120px;
+  padding: 0 4px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 750;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.session-action {
+  height: 38px;
+  min-height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--muted-strong);
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 650;
+  white-space: nowrap;
+  box-shadow: none;
+}
+
+.session-action:hover:not(:disabled) {
+  background: var(--accent-soft);
+  color: var(--accent);
+  box-shadow: none;
+}
+
 @media (max-width: 760px) {
   .home-nav {
     min-height: 62px;
     padding: 12px 14px;
   }
 
-  .nav-links {
+  .nav-actions {
     display: none;
   }
 }
