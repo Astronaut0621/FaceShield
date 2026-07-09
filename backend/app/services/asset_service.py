@@ -20,6 +20,9 @@ class AssetService:
     def get_asset(self, file_id: int, user_id: int):
         return self.repository.get_active(file_id=file_id, user_id=user_id)
 
+    def delete_asset(self, file_id: int, user_id: int) -> bool:
+        return self.repository.soft_delete(file_id=file_id, user_id=user_id)
+
 
 def list_assets(db, user_id: int, page: int = 1, page_size: int = 20) -> dict:
     return AssetService(db).list_assets(user_id=user_id, page=page, page_size=page_size)

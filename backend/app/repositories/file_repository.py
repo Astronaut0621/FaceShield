@@ -45,6 +45,17 @@ class FileRepository:
         )
         return self.db.scalar(stmt) or 0
 
+    def soft_delete(self, file_id: int, user_id: int | None = None) -> bool:
+        record = self.db.get(FileRecord, file_id)
+        if record is None or record.is_deleted:
+            return False
+        if user_id is not None and record.user_id != user_id:
+            return False
+
+        record.is_deleted = True
+        self.db.commit()
+        return True
+
     def create(
         self,
         *,

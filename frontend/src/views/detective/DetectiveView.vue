@@ -159,6 +159,8 @@ async function submit() {
 }
 
 .detective-banner {
+  position: relative;
+  overflow: hidden;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -167,10 +169,31 @@ async function submit() {
   padding: 30px;
   border-radius: 22px;
   background:
-    linear-gradient(135deg, rgba(15, 23, 42, 0.94), rgba(37, 99, 235, 0.76)),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(234, 241, 255, 0.92)),
+    var(--surface);
+  color: var(--text);
+  border: 1px solid rgba(216, 224, 236, 0.9);
+  box-shadow: 0 16px 42px rgba(23, 32, 51, 0.07);
+}
+
+.detective-banner::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 auto;
+  width: 280px;
+  height: 180px;
+  background:
+    linear-gradient(180deg, transparent 0%, rgba(23, 32, 51, 0.42) 100%),
     url('/images/home-hero-bg.png') center / cover no-repeat;
-  color: #fff;
-  box-shadow: 0 20px 60px rgba(23, 32, 51, 0.16);
+  opacity: 0.18;
+  border-top-left-radius: 120px;
+  pointer-events: none;
+}
+
+.banner-content,
+.detective-banner :deep(.back-home) {
+  position: relative;
+  z-index: 1;
 }
 
 .banner-kicker {
@@ -178,8 +201,8 @@ async function submit() {
   margin: 0 0 10px;
   padding: 6px 10px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.13);
-  color: rgba(255, 255, 255, 0.88);
+  background: var(--accent-soft);
+  color: var(--accent);
   font-size: 12px;
   font-weight: 750;
 }
@@ -196,7 +219,7 @@ async function submit() {
   max-width: 680px;
   font-size: 15px;
   line-height: 1.75;
-  color: rgba(255, 255, 255, 0.86);
+  color: var(--muted);
 }
 
 .banner-tags {
@@ -208,8 +231,9 @@ async function submit() {
 .banner-tags span {
   padding: 6px 11px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.14);
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(37, 99, 235, 0.08);
+  border: 1px solid rgba(37, 99, 235, 0.12);
+  color: var(--accent-strong);
   font-size: 12px;
   font-weight: 700;
 }

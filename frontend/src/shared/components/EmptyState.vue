@@ -22,6 +22,11 @@ defineProps({
   gap: 12px;
   place-items: center;
   padding: 40px 20px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(247, 249, 252, 0.9), rgba(255, 255, 255, 0.96)),
+    var(--surface);
   color: var(--muted);
   text-align: center;
 }
@@ -31,12 +36,12 @@ defineProps({
 }
 
 .empty-action :deep(button) {
-  height: 36px;
+  min-height: 40px;
   padding: 0 16px;
-  border: 0;
-  border-radius: 10px;
+  border-radius: 12px;
   background: var(--accent);
   color: #fff;
   cursor: pointer;
+  font-weight: 750;
 }
 </style>

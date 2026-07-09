@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, UploadFile, Query
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_current_user, get_file_service, get_db
+from app.domain.exceptions import NotFoundError
 from app.models.user import User
 from app.serializers.file_serializer import serialize_file_record
 from app.services.asset_service import AssetService
@@ -43,3 +44,16 @@ def get_asset(
     if asset is None:
         return success(None, message="Asset not found.")
     return success(serialize_file_record(asset), message="Query successful.")
+
+
+@router.delete("/{file_id}")
+def delete_asset(
+    file_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    service = AssetService(db)
+    deleted = service.delete_asset(file_id=file_id, user_id=current_user.id)
+    if not deleted:
+        raise NotFoundError("Asset not found.")
+    return success({"deleted": True}, message="Delete successful.")

@@ -56,21 +56,4 @@ watch(() => route.params.id, loadDetail)
 .detail-page {
   max-width: 960px;
 }
-
-.secondary-btn {
-  height: 36px;
-  padding: 0 14px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: var(--surface);
-  color: var(--muted-strong);
-  cursor: pointer;
-  font-weight: 700;
-}
-
-.secondary-btn:hover {
-  background: var(--accent-soft);
-  color: var(--accent);
-  box-shadow: none;
-}
 </style>

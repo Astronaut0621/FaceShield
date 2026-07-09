@@ -4,7 +4,9 @@
       <h2>{{ title }}</h2>
       <p v-if="description">{{ description }}</p>
     </div>
-    <slot name="actions" />
+    <div v-if="$slots.actions" class="page-actions">
+      <slot name="actions" />
+    </div>
   </header>
 </template>
 
